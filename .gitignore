@@ -1,0 +1,13 @@
+*.idea
+*bin/
+*Debug/
+**__pycache__/
+*obj/
+*.config/
+
+
+
+# single file excludes
+text.txt
+text_old.txt
+text_old2.txt

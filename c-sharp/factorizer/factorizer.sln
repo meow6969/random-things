@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "factorizer", "factorizer\factorizer.csproj", "{F3B91302-7718-4042-B73B-C5A596679CCE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F3B91302-7718-4042-B73B-C5A596679CCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3B91302-7718-4042-B73B-C5A596679CCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3B91302-7718-4042-B73B-C5A596679CCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3B91302-7718-4042-B73B-C5A596679CCE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
