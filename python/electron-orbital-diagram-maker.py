@@ -1,5 +1,12 @@
 import math
 from PyAstronomy import pyasl
+
+# gives electron orbital diagram information for a given element
+# i mmmade this years ago and i forgot everything i learned in chemistry
+# so idk what this really does anymore sorry
+# requires pyastronomy
+# > pip install PyAstronomy
+
 def main(atom):
   levels = [
     "1s",

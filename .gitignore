@@ -1,13 +1,23 @@
+# jetbrains .idea folder
 *.idea
+# c-sharp binary file output folder
 *bin/
+# c-sharp debug release binary file output folder
 *Debug/
+# directory where python puts compiled .pyc files
 **__pycache__/
+# these idk something to do with c-sharp
 *obj/
 *.config/
 
 
 
-# single file excludes
+### single file excludes ###
+
+# this is in the csharp markov chain program
 text.txt
 text_old.txt
 text_old2.txt
+
+# this is in the upload_stats nicotine+ plugin
+nicotine-plus.db

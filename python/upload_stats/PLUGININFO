@@ -1,0 +1,4 @@
+Version = "2023-09-24r00"
+Authors = ["meowmeowgaming"]
+Name = "Upload Stats"
+Description = "Collects statistics about the people who download from you."
