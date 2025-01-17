@@ -1,4 +1,5 @@
-﻿namespace factorizer;
+﻿// ReSharper disable UnusedMember.Local
+namespace factorizer;
 
 internal static class Program
 {
@@ -11,12 +12,13 @@ internal static class Program
     
     private static void Main(string[] args)
     {
-        GetFactorsProgram(args);
+        OldGetFactorsProgram(args);
+        // Tests.TestAllTests();
         // TestGetFactors();
     }
     
     
-    private static void GetFactorsProgram(string[] args)
+    private static void OldGetFactorsProgram(string[] args)
     {
         if (args.Length == 0)
         {
@@ -218,53 +220,53 @@ internal static class Program
         return true;
     }
     
-    // private static void TestGetFactors()
-    // {
-    //     int[] numbers = [0, 5, 3, -6, 10];
-    //
-    //     foreach (int num in numbers)
-    //     {
-    //         OutputFactorsResult("", num);
-    //     }
-    // }
-    //
-    //
-    // private static void IsPrimeProgram(string[] args)
-    // {
-    //     if (args.Length == 0)
-    //     {
-    //         string? userInput = "";
-    //         while (userInput != "q")
-    //         {
-    //             Console.Write("Enter an int: ");
-    //             userInput = Console.ReadLine();
-    //             OutputResult(userInput);
-    //         }
-    //         
-    //     }
-    //     else
-    //     {
-    //         foreach (string i in args)
-    //         {
-    //             OutputResult(i);
-    //         }
-    //     }
-    // }
-    //
-    //
-    // private static void OutputResult(string? i)
-    // {
-    //     if (i == null)
-    //     {
-    //         Console.WriteLine("No user input found");
-    //         return;
-    //     }
-    //     
-    //     int? num = GetNumberFromString(i);
-    //     
-    //     if (num == null) return;
-    //     
-    //
-    //     Console.WriteLine(IsPrime((int)num) ? $"{i} is prime" : $"{i} is composite");
-    // }
+    private static void TestGetFactors()
+    {
+        int[] numbers = [0, 5, 3, -6, 10];
+    
+        foreach (int num in numbers)
+        {
+            OutputFactorsResult("", num);
+        }
+    }
+    
+    
+    private static void IsPrimeProgram(string[] args)
+    {
+        if (args.Length == 0)
+        {
+            string? userInput = "";
+            while (userInput != "q")
+            {
+                Console.Write("Enter an int: ");
+                userInput = Console.ReadLine();
+                OutputResult(userInput);
+            }
+            
+        }
+        else
+        {
+            foreach (string i in args)
+            {
+                OutputResult(i);
+            }
+        }
+    }
+    
+    
+    private static void OutputResult(string? i)
+    {
+        if (i == null)
+        {
+            Console.WriteLine("No user input found");
+            return;
+        }
+        
+        int? num = GetNumberFromString(i);
+        
+        if (num == null) return;
+        
+    
+        Console.WriteLine(IsPrime((int)num) ? $"{i} is prime" : $"{i} is composite");
+    }
 }
