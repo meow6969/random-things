@@ -14,18 +14,14 @@ public abstract class MathLatex
         // 5yx^{3} summthing like dis
         string term = "";
         // if (mathTerm.Coefficient != 1) term += $"{mathTerm.Coefficient}";
-        bool firstPass = true;
         // PrintMathTerm(mathTerm);
+        if (mathTerm.Coefficient >= 0) term += "+";
+        if (mathTerm.Coefficient != 1) term += $"{mathTerm.Coefficient}";
         
-        foreach (MathNumber variable in mathTerm.Variables)
+        foreach (MathVariable variable in mathTerm.Variables)
         {
-            if (firstPass && variable.Coefficient >= 0) term += "+";
-            if (variable.Coefficient != 1) term += variable.Coefficient;
-            if (variable is { Exponent: 1, Coefficient: 1, Name: null }) term += "1";
-            if (variable.Name != null) term += variable.Name;
+            term += variable.Name;
             if (variable.Exponent != 1) term += "^{" + $"{variable.Exponent}" + "}";
-            
-            firstPass = false;
         }
 
         return term;
@@ -50,11 +46,11 @@ public abstract class MathLatex
         // will be like 5y^{69}x^{4}
         // this code just going to assumme whatever called it actually gave it a latexterm
         MathTerm mathTerm = new MathTerm();
-        MathNumber? lastAddedVariable = null;
+        MathVariable? lastAddedVariable = null;
 
-        int currentCoefficient = 1;
         bool gettingCoefficient = false;
         bool gettingExponent = false;
+        bool negative = false;
         string token = "";
         foreach (char theChar in latexTerm)
         {
@@ -68,46 +64,43 @@ public abstract class MathLatex
                     token = "";
                     continue;
                 }
-                else if (theChar == '-')
+                if (theChar == '-')
                 {
                     gettingCoefficient = true;
-                    token = "-1";
+                    negative = true;
+                    token = "";
                     continue;
                 }
             }
             
-            if (int.TryParse(token, out int _))
+            if (token.All(char.IsNumber) && !gettingExponent)
             {
-                if (gettingExponent) continue;
                 gettingCoefficient = true;
-                continue;
             }
-            else if (gettingCoefficient)
+            else if (gettingCoefficient || negative)
             {
                 // coefficients.Add(int.Parse(token.Substring(0, token.Length - 1)));
-                currentCoefficient = int.Parse(RemoveLastFromString(token));
-                token = $"{theChar}";
+                mathTerm.Coefficient *= int.Parse(RemoveLastFromString(token));
+                if (negative) mathTerm.Coefficient *= -1;
+                negative = false;
                 gettingCoefficient = false;
+                token = $"{theChar}";
             }
             
-            if (token.All(Char.IsLetter))
+            if (token.All(char.IsLetter))
             {
-                lastAddedVariable = new MathNumber
+                lastAddedVariable = new MathVariable
                 {
-                    Name = char.Parse(token),
-                    Coefficient = currentCoefficient,
-                    Exponent = 1
+                    Name = theChar
                 };
-                currentCoefficient = 1;
                 
                 mathTerm.AddVariableToVariables(lastAddedVariable);
                 token = "";
                 continue;
             }
-
             if (token == "^{")  // exponent!!
             {
-                token = token.Substring(2);
+                token = "";
                 gettingExponent = true;
             }
             else if (gettingExponent && theChar == '}')
@@ -120,15 +113,7 @@ public abstract class MathLatex
             }
         }
         
-        if (int.TryParse(token, out int n))
-        {
-            lastAddedVariable = new MathNumber
-            {
-                Coefficient = n
-            };
-                
-            mathTerm.AddVariableToVariables(lastAddedVariable);
-        }
+        if (int.TryParse(token, out int n)) mathTerm.Coefficient *= n;
 
         return mathTerm;
     }
@@ -142,7 +127,7 @@ public abstract class MathLatex
         string token = "";
         string currentOperation = "";
         bool gettingOperation = false;
-        bool gettingMathTerm = false;
+        // bool gettingMathTerm = false;
         foreach (char theChar in latexExpression)
         {
             if (theChar == '\\')  // not implemented yet (this is for like fraction stuff)

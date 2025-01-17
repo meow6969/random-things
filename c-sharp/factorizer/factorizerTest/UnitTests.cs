@@ -10,22 +10,24 @@ public class UnitTests(ITestOutputHelper testOutputHelper)
     [Fact]
     public void TestMathTermToLatex()
     {
-        MathNumber[] mathNumbers =
+        MathVariable[] mathNumbers =
         [
-            new MathNumber
+            new MathVariable
             {
-                Coefficient = 5,
                 Name = 'y'
             },
-            new MathNumber
+            new MathVariable
             {
                 Name = 'x',
                 Exponent = 3
             }
         ];
 
-        MathTerm mathTerm = new MathTerm(mathNumbers);
-    
+        MathTerm mathTerm = new MathTerm(mathNumbers)
+        {
+            Coefficient = 5
+        };
+
         // testOutputHelper.WriteLine(mathTerm.StringRepresentation);
     
         Assert.Equal("+5yx^{3}", mathTerm.StringRepresentation);
@@ -34,22 +36,24 @@ public class UnitTests(ITestOutputHelper testOutputHelper)
     [Fact]
     public void TestMathTermStringRepresentation()
     {
-        MathNumber[] mathNumbers =
+        MathVariable[] mathNumbers =
         [
-            new MathNumber
+            new MathVariable
             {
                 
-                Name = 'y',
-                Coefficient = 5
+                Name = 'y'
             },
-            new MathNumber
+            new MathVariable
             {
                 Name = 'x',
                 Exponent = 3
             }
         ];
 
-        MathTerm mathTerm = new MathTerm(mathNumbers);
+        MathTerm mathTerm = new MathTerm(mathNumbers)
+        {
+            Coefficient = 5
+        };
     
         // testOutputHelper.WriteLine(mathTerm.StringRepresentation);
         mathTerm.GetVariablesByName('x')[0].Exponent = 4;
@@ -62,77 +66,77 @@ public class UnitTests(ITestOutputHelper testOutputHelper)
     [Fact]
     public void TestLatexToMathTerm()
     {
-        MathNumber[] mathNumbers = // x^{2}6x9y
+        MathVariable[] mathNumbers = // x^{2}6x9y
         [ 
-            new MathNumber {
+            new MathVariable {
                 Name = 'x',
                 Exponent = 2
             },
-            new MathNumber {
-                Name = 'x',
-                Coefficient = 6
+            new MathVariable {
+                Name = 'x'
             },
-            new MathNumber {
-                Coefficient = 9
-            },
-            new MathNumber {
+            new MathVariable {
                 Name = 'y'
             }
         ];
         
-        MathTerm mathTerm = new MathTerm(variables: mathNumbers);
+        MathTerm mathTerm = new MathTerm(mathNumbers)
+        {
+            Coefficient = 54
+        };
         MathTerm mathTerm2 = LatexTermToMathTerm("x^{2}6x9y");
         // testOutputHelper.WriteLine(mathTerm.StringRepresentation);
         // testOutputHelper.WriteLine(mathTerm2.StringRepresentation);
-        Assert.Equal(mathTerm2.StringRepresentation, mathTerm.StringRepresentation);
+        Assert.Equal(mathTerm.StringRepresentation, mathTerm2.StringRepresentation);
     }
     
     [Fact]
     public void TestLatexToMathExpression()
     {
-        MathNumber[] mathNumbers1 = // -x^{2}6x9y
+        MathVariable[] mathNumbers1 = // -57x^{2}xy
         [ 
-            new MathNumber {
-                Coefficient = -1,
+            new MathVariable {
                 Name = 'x',
                 Exponent = 2
             },
-            new MathNumber {
-                Name = 'x',
-                Coefficient = 6
+            new MathVariable {
+                Name = 'x'
             },
-            new MathNumber {
-                Coefficient = 9
-            },
-            new MathNumber {
+            new MathVariable {
                 Name = 'y'
             }
         ];
         
-        MathNumber[] mathNumbers2 = // 6x9y
+        MathVariable[] mathNumbers2 = // 54xy
         [
-            new MathNumber {
-                Name = 'x',
-                Coefficient = 6
+            new MathVariable {
+                Name = 'x'
             },
-            new MathNumber {
-                Coefficient = 9
-            },
-            new MathNumber {
+            new MathVariable {
                 Name = 'y'
             }
         ];
         
         MathExpression mathExpression1 = new MathExpression(
-            new MathTerm(mathNumbers1),
-            new MathTerm(mathNumbers2)
+            new MathTerm(mathNumbers1) { Coefficient = -57 },
+            new MathTerm(mathNumbers2) { Coefficient = 54 }
             );
-        MathExpression mathExpression2 = LatexExpressionToMathExpression("-x^{2}6x9y+6x9y");
+        MathExpression mathExpression2 = LatexExpressionToMathExpression("-57x^{2}xy+54xy");
         // PrintMathExpression(mathExpression1);
         // PrintMathExpression(mathExpression2);
         
         // testOutputHelper.WriteLine(mathTerm.StringRepresentation);
         // testOutputHelper.WriteLine(mathTerm2.StringRepresentation);
+        Assert.Equal(mathExpression1.StringRepresentation, mathExpression2.StringRepresentation);
+    }
+
+    [Fact]
+    public void TestCombineMathExpressionMathTerms()
+    {
+        MathExpression mathExpression1 = LatexExpressionToMathExpression("-47x^{3}y+5y^{4}");
+        MathExpression mathExpression2 = LatexExpressionToMathExpression("-57x^{2}xy+5x^{2}xy2+2y^{4}+3y^{4}");
+        mathExpression2 = CombineMathExpressionMathTerms(mathExpression2);
+        
         Assert.Equal(mathExpression1.StringRepresentation, mathExpression2.StringRepresentation);
     }
 }

@@ -12,7 +12,8 @@ internal static class Program
     
     private static void Main(string[] args)
     {
-        OldGetFactorsProgram(args);
+        Console.WriteLine(int.Parse("-1"));
+        // OldGetFactorsProgram(args);
         // Tests.TestAllTests();
         // TestGetFactors();
     }

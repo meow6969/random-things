@@ -5,19 +5,13 @@ namespace factorizer;
 
 public abstract class MathClasses
 {
-    public class MathNumber
+    public class MathVariable
     {
-        public int Coefficient { get; set; } = 1;
+        // public int Coefficient { get; set; } = 1;
         // TODO: allow for exponent to be algebraic expression for rn tho they are ints
         public int Exponent { get; set; } = 1;
         public Guid Id { get; } = Guid.NewGuid();
-        public char? Name { get; set; }
-        
-        public MathNumber()
-        {
-            // note Coefficient is just the value of the number
-            // it is this way for parity between the 2 types (MathNumber, MathNumber)
-        }
+        public char Name { get; set; }
     }
     
     // public class MathNumber : MathNumber // like x^3
@@ -35,39 +29,28 @@ public abstract class MathClasses
         public Guid Id { get; } = Guid.NewGuid();
         // public int Coefficient { get; set; }
         // a math term is negative only if the coefficient is negative
-        public MathNumber[] Variables { get; set; }
+        public MathVariable[] Variables { get; set; }
         public Dictionary<char, int> VariablesDict => UtilityFunctions.MathTermVariablesToNameExponentDict(this);
-        public int Coefficient => UtilityFunctions.GetCoefficientFromMathTerm(this);
+        public int Coefficient { get; set; } = 1;
         
-        public MathTerm(MathNumber[]? variables=null)
+        public MathTerm(MathVariable[]? variables=null)
         {
             // Coefficient = coefficient;
             Variables = variables ?? [];
         }
         
-        public void AddVariableToVariables(MathNumber variable)
+        public void AddVariableToVariables(MathVariable variable)
         {
-            List<MathNumber> newVariables = Variables.ToList();
+            List<MathVariable> newVariables = Variables.ToList();
             newVariables.Add(variable);
             Variables = newVariables.ToArray();
         }
 
-        public MathNumber[] AllMathVariables()
+        public MathVariable[] GetVariablesByName(char name, int? limit=null)
         {
-            List<MathNumber> mathNumbers = [];
-            foreach (MathNumber number in Variables)
-            {
-                if (number.Name != null) mathNumbers.Add(number);
-            }
-
-            return mathNumbers.ToArray();
-        }
-
-        public MathNumber[] GetVariablesByName(char name, int? limit=null)
-        {
-            List<MathNumber> mathNumbers = [];
+            List<MathVariable> mathNumbers = [];
             
-            foreach (MathNumber variable in AllMathVariables())
+            foreach (MathVariable variable in Variables)
             {
                 if (variable.Name != name) continue;
                 mathNumbers.Add(variable);
@@ -77,9 +60,9 @@ public abstract class MathClasses
             return mathNumbers.ToArray();
         }
         
-        public MathNumber GetVariableById(Guid id)
+        public MathVariable GetVariableById(Guid id)
         {
-            foreach (MathNumber variable in Variables)
+            foreach (MathVariable variable in Variables)
             {
                 if (variable.Id == id) return variable;
             }
@@ -88,12 +71,12 @@ public abstract class MathClasses
 
         public string StringRepresentation => MathTermToLatex(this);
 
-        public KeyValuePair<char, MathNumber>[] AllMathNumberNames()
+        public KeyValuePair<char, MathVariable>[] AllMathNumberNames()
         {
-            List<KeyValuePair<char, MathNumber>> mathNumbers = new List<KeyValuePair<char, MathNumber>>();
-            foreach (MathNumber variable in AllMathVariables())
+            List<KeyValuePair<char, MathVariable>> mathNumbers = new List<KeyValuePair<char, MathVariable>>();
+            foreach (MathVariable variable in Variables)
             {
-                mathNumbers.Add(new KeyValuePair<char, MathNumber>((char)variable.Name!, variable));
+                mathNumbers.Add(new KeyValuePair<char, MathVariable>(variable.Name, variable));
             }
 
             return mathNumbers.ToArray();

@@ -1,10 +1,11 @@
 using System.Collections;
 using factorizer;
 using static factorizer.MathClasses;
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace factorizer;
 
-public class UtilityFunctions
+public abstract class UtilityFunctions
 {
     public static string RemoveLastFromString(string text, int lastToRemove=1)
     {
@@ -20,10 +21,10 @@ public class UtilityFunctions
         Console.WriteLine($"term.Id: {term.Id.ToString()}");
         Console.WriteLine($"term.StringRepresentation: {term.StringRepresentation}");
         int varNum = 1;
-        foreach (MathNumber number in term.Variables)
+        foreach (MathVariable number in term.Variables)
         {
             Console.WriteLine($"\nVariable {varNum}: ");
-            PrintMathNumber(number);
+            PrintMathVariable(number);
             varNum++;
         }
     }
@@ -52,60 +53,37 @@ public class UtilityFunctions
     //     else Console.WriteLine($"mathNumber.Name: {mathNumber.Name}");
     // }
     
-    public static void PrintMathNumber(MathNumber mathNumber)
+    public static void PrintMathVariable(MathVariable mathNumber)
     {
-        Console.WriteLine($"MathNumber.Coefficient: {mathNumber.Coefficient}");
         Console.WriteLine($"MathNumber.Id: {mathNumber.Id.ToString()}");
         Console.WriteLine($"MathNumber.Exponent: {mathNumber.Exponent}");
-        if (mathNumber.Name == null) Console.WriteLine($"MathNumber.Name: null");
-        else Console.WriteLine($"MathNumber.Name: {mathNumber.Name}");
+        Console.WriteLine($"MathNumber.Name: {mathNumber.Name}");
     }
     
     public static MathTerm CombineMathTermMathNumbers(MathTerm term)
     {
+        // Console.WriteLine(term.StringRepresentation);
+        
         Dictionary<char, int> variableExponents = new Dictionary<char, int>();
-        int coefficients = term.Coefficient;
-        foreach (MathNumber number in term.Variables)
+        foreach (MathVariable number in term.Variables)
         {
-            if (number.Name != null)
-            {
-                variableExponents[(char)number.Name] += 1;
-            }
+            if (!variableExponents.ContainsKey(number.Name)) variableExponents[number.Name] = 0;
+            variableExponents[number.Name] += number.Exponent;
         }
 
-        MathTerm newTerm = new MathTerm();
+        MathTerm newTerm = new MathTerm { Coefficient = term.Coefficient };
         foreach (char variableName in variableExponents.Keys)
         {
-            newTerm.AddVariableToVariables(new MathNumber
+            newTerm.AddVariableToVariables(new MathVariable
             {
-                Coefficient = coefficients,
                 Exponent = variableExponents[variableName],
                 Name = variableName
             });
-            coefficients = 1;
         }
-
-        if (variableExponents.Count == 0)
-        {
-            newTerm.AddVariableToVariables(new MathNumber
-            {
-                Coefficient = coefficients
-            });
-        }
+        
+        // Console.WriteLine(newTerm.StringRepresentation);
 
         return newTerm;
-    }
-
-    public static int GetCoefficientFromMathTerm(MathTerm term)
-    {
-        int coefficient = 0;
-        
-        foreach (MathNumber num in term.Variables)
-        {
-            coefficient *= (int)Math.Pow(num.Coefficient, num.Exponent);
-        }
-
-        return coefficient;
     }
     
     public static Dictionary<char, int> MathTermVariablesToNameExponentDict(MathTerm term)
@@ -113,22 +91,15 @@ public class UtilityFunctions
         Dictionary<char, int> termVariables = [];
         // we combine them here for reasons shut up ITS IMMPORTANT
         // ok brah why r u so mean to me  :c
-        foreach (MathNumber variable in CombineMathTermMathNumbers(term).Variables)
+        foreach (MathVariable variable in CombineMathTermMathNumbers(term).Variables)
         {
-            if (variable.Name == null) continue;
-            termVariables[(char)variable.Name] = variable.Exponent;
+            termVariables[variable.Name] = variable.Exponent;
         }
 
         return termVariables;
     }
 
-    public MathNumber[] CombineLikeVariables(MathTerm term1, MathTerm term2)
-    {
-        MathNumber[] variables = [];
-        
-    }
-
-    public MathExpression CombineMathExpressionMathTerms(MathExpression expression)
+    public static MathExpression CombineMathExpressionMathTerms(MathExpression expression)
     { 
         // bro i cant figure out wtf is happenign anymore 
         List<MathTerm> combinedTerms = [];
@@ -139,31 +110,61 @@ public class UtilityFunctions
         // this gives us a unique list of MathTerms
         combinedTerms.AddRange(expression.Terms.Select(CombineMathTermMathNumbers));
 
+        bool combinedATerm = true;
+        while (combinedATerm)
+        {
+            KeyValuePair<bool, MathTerm[]> temp = CombineMathTermsFromList(combinedTerms.ToArray());
+            combinedATerm = temp.Key;
+            combinedTerms = temp.Value.ToList();
+        }
+
+        return new MathExpression(combinedTerms.ToArray());
+    }
+    
+    private static KeyValuePair<bool, MathTerm[]> CombineMathTermsFromList(MathTerm[] combinedTerms)
+    {
+        bool combinedATerm = false;
+        
+        List<MathTerm> newTerms = [];
         List<Guid> doneTerms = [];
-        Dictionary<Guid, MathTerm> newTerms = [];
         
         // we have to compare every term with every other term
         int i = 0;
         foreach (MathTerm term1 in combinedTerms)
         {
+            if (doneTerms.Contains(term1.Id)) continue;
             Dictionary<char, int> term1Variables = MathTermVariablesToNameExponentDict(term1);
             
             // we slice here because otherwise we would be comparing the same terms multiple times
             foreach (MathTerm term2 in combinedTerms[i..])
             {
+                if (doneTerms.Contains(term2.Id)) continue;
                 if (ReferenceEquals(term1, term2)) continue;
                 Dictionary<char, int> term2Variables = MathTermVariablesToNameExponentDict(term2);
                 if (!term1Variables.SequenceEqual(term2Variables)) continue;
                 // that means we can add them mtogether!!!!!!!!
                 MathTerm term2Replacement = new MathTerm
                 {
-                    Variables = 
+                    Variables = term2.Variables,
+                    Coefficient = term1.Coefficient + term2.Coefficient
                 };
+                combinedATerm = true;
                 doneTerms.Add(term1.Id);
-                newTerms.Add(term2.Id, term2Replacement);
+                doneTerms.Add(term2.Id);
+                newTerms.Add(term2Replacement);
             }
 
             i += 1;
         }
+
+        foreach (MathTerm term in combinedTerms)
+        {
+            if (!doneTerms.Contains(term.Id))
+            {
+                newTerms.Add(term);
+            }
+        }
+
+        return new KeyValuePair<bool, MathTerm[]>(combinedATerm, newTerms.ToArray());
     }
 }
