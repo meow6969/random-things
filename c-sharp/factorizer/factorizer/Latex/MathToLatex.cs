@@ -51,7 +51,7 @@ public class MathToLatex
         
         foreach (MathExpression expression in mathParentheses.Expressions)
         {
-            parentheses += "(" + MathExpressionToLatex(expression) + ")";
+            parentheses += "\\left(" + MathExpressionToLatex(expression) + "\\right)";
         }
 
         return parentheses;

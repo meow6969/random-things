@@ -43,6 +43,21 @@ public abstract class UtilityFunctions
             varNum++;
         }
     }
+    
+    public static void PrintMathParenthesis(MathParentheses parenthesis)
+    {
+        Console.WriteLine("\nnew MathParenthesis:");
+        // Console.WriteLine($"term.StringRepresentation: {term.StringRepresentation}");
+        Console.WriteLine($"parenthesis.Id: {parenthesis.Id.ToString()}");
+        Console.WriteLine($"parenthesis.StringRepresentation: {parenthesis.StringRepresentation}");
+        int varNum = 1;
+        foreach (MathExpression expression in parenthesis.Expressions)
+        {
+            Console.WriteLine($"\nTerm {varNum}: ");
+            PrintMathExpression(expression);
+            varNum++;
+        }
+    }
 
     // public static void PrintMathNumber(MathNumber mathNumber)
     // {

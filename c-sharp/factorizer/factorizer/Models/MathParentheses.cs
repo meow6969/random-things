@@ -9,6 +9,7 @@ public class MathParentheses
     public MathExpression[] Expressions { get; set; }
     public string StringRepresentation => MathParenthesesToLatex(this);
     public Guid Id { get; } = Guid.NewGuid();
+    public MathTerm Coefficient = new MathTerm();
         
     public MathParentheses(params MathExpression[]? expressions)
     {
@@ -22,7 +23,7 @@ public class MathParentheses
         Expressions = newExpressions.ToArray();
     }
         
-    public MathExpression GetTermById(Guid id)
+    public MathExpression GetExpresionById(Guid id)
     {
         foreach (MathExpression term in Expressions)
         {

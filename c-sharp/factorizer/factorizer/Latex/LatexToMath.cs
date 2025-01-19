@@ -85,6 +85,7 @@ public class LatexToMath
         }
         
         if (int.TryParse(token, out int n)) mathTerm.Coefficient *= n;
+        if (negative) mathTerm.Coefficient *= -1;
 
         return mathTerm;
     }
@@ -94,6 +95,7 @@ public class LatexToMath
         // will be like 5y^{69}x^{4}+5x
         // this code just going to assumme whatever called it actually gave it a latexexpression
         MathExpression mathExpression = new MathExpression();
+        // Console.WriteLine(latexExpression);
 
         string token = "";
         string currentOperation = "";
@@ -129,8 +131,9 @@ public class LatexToMath
 
         if (token.Length > 0)
         {
-            if (currentOperation == "") currentOperation = "+";
-            MathTerm term = LatexTermToMathTerm(currentOperation + token);
+            // if (currentOperation == "") currentOperation = "+";
+            // Console.WriteLine($"token: {token}");
+            MathTerm term = LatexTermToMathTerm(token);
             // Console.WriteLine($"currentOperation + token: {currentOperation}{token}");
             // Console.WriteLine("THE TERMM VVV");
             // PrintMathTerm(term);
@@ -150,6 +153,8 @@ public class LatexToMath
     }
 
     // like: \left(6x+9\right)\left(9y+7\right)
+    // TODO: support the coefficient thing like: 6x+9(5x+5) -> 6x, 9(5x+5)
+    // TODO:                         rn it goes: 6x+9(5x+5) -> (6x+9)(5x+5), which is wrong
     public static MathParentheses LatexParenthesesToMathParentheses(string latexParentheses)
     {
         string startParenthesis = "\\left(";
@@ -180,9 +185,10 @@ public class LatexToMath
                 {
                     if (searchingForToken == startParenthesis)
                     {
-                        Console.WriteLine($"{searchingForToken} = {startParenthesis}");
+                        // Console.WriteLine($"{searchingForToken} = {startParenthesis}");
                         searchingFor = SearchingFor.Nothing;
                         tokens.Add(token);
+                        // Console.WriteLine(token);
                         token = "";
                         searchingForToken = "";
                     }
@@ -217,7 +223,7 @@ public class LatexToMath
             }
             
             token += theChar;
-            Console.WriteLine($"token: {token}");
+            // Console.WriteLine($"token: {token}");
             // Console.ReadLine();
         }
 
@@ -226,6 +232,7 @@ public class LatexToMath
         foreach (string newToken in tokens)
         {
             if (newToken.Trim() == "") continue;
+            // Console.WriteLine(newToken);
             mathExpressions.Add(LatexExpressionToMathExpression(newToken));
         }
         return new MathParentheses(mathExpressions.ToArray()); 

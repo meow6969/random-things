@@ -134,41 +134,49 @@ public class UnitTests(ITestOutputHelper testOutputHelper)
     [Fact]
     public void TestLatexToMathParentheses()
     {
-        MathVariable[] mathNumbers1 = // -57x^{2}xy
-        [ 
-            new MathVariable {
-                Name = 'x',
-                Exponent = 2
-            },
-            new MathVariable {
-                Name = 'x'
-            },
-            new MathVariable {
-                Name = 'y'
-            }
-        ];
-        
-        MathVariable[] mathNumbers2 = // 54xy
-        [
-            new MathVariable {
-                Name = 'x'
-            },
-            new MathVariable {
-                Name = 'y'
-            }
-        ];
+        // \\left(69x^{2}-6\\right)\\left(6x+9\\right)\\left(9y+7\\right)
         
         MathExpression mathExpression1 = new MathExpression(
-            new MathTerm(mathNumbers1) { Coefficient = -57 },
-            new MathTerm(mathNumbers2) { Coefficient = 54 }
+            new MathTerm([
+                new MathVariable {
+                    Name = 'x',
+                    Exponent = 2
+                }
+            ]) { Coefficient = 69 },
+            new MathTerm { Coefficient = -6 }
         );
-        MathExpression mathExpression2 = LatexExpressionToMathExpression("(-57x^{2}xy+54xy)(6x+9)");
+        
+        MathExpression mathExpression2 = new MathExpression(
+            new MathTerm([
+                new MathVariable {
+                    Name = 'x'
+                }
+            ]) { Coefficient = 6 },
+            new MathTerm { Coefficient = 9 }
+        );
+        MathExpression mathExpression3 = new MathExpression(
+            new MathTerm([
+                new MathVariable {
+                    Name = 'y'
+                }
+            ]) { Coefficient = 9 },
+            new MathTerm { Coefficient = 7 }
+        );
+
+        MathParentheses mathParenthesis1 = new MathParentheses([
+            mathExpression1,
+            mathExpression2,
+            mathExpression3
+        ]);
+        
+        MathParentheses mathParenthesis2 = 
+            LatexParenthesesToMathParentheses("\\left(69x^{2}-6\\right)\\left(6x+9\\right)\\left(9y+7\\right)");
         // PrintMathExpression(mathExpression1);
         // PrintMathExpression(mathExpression2);
         
-        // testOutputHelper.WriteLine(mathTerm.StringRepresentation);
-        // testOutputHelper.WriteLine(mathTerm2.StringRepresentation);
-        Assert.Equal(mathExpression1.StringRepresentation, mathExpression2.StringRepresentation);
+        testOutputHelper.WriteLine(mathParenthesis1.StringRepresentation);
+        testOutputHelper.WriteLine(mathParenthesis2.StringRepresentation);
+        Assert.Equal(mathParenthesis1.StringRepresentation, mathParenthesis2.StringRepresentation);
     }
 
     [Fact]
