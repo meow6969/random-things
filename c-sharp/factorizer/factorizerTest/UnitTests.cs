@@ -1,5 +1,5 @@
-using static factorizer.MathClasses;
-using static factorizer.MathLatex;
+using factorizer.Models;
+using static factorizer.Latex.LatexToMath;
 using static factorizer.UtilityFunctions;
 // ReSharper disable UnusedType.Global
 
@@ -40,7 +40,7 @@ public class UnitTests(ITestOutputHelper testOutputHelper)
         [
             new MathVariable
             {
-                
+                Exponent = 3,
                 Name = 'y'
             },
             new MathVariable
@@ -61,6 +61,7 @@ public class UnitTests(ITestOutputHelper testOutputHelper)
         // testOutputHelper.WriteLine(mathTerm.StringRepresentation);
         
         Assert.Equal("+5y^{69}x^{4}", mathTerm.StringRepresentation);
+        // Assert.Equal("+5y^{3}x^{3}", mathTerm.StringRepresentation);
     }
 
     [Fact]
@@ -122,6 +123,46 @@ public class UnitTests(ITestOutputHelper testOutputHelper)
             new MathTerm(mathNumbers2) { Coefficient = 54 }
             );
         MathExpression mathExpression2 = LatexExpressionToMathExpression("-57x^{2}xy+54xy");
+        // PrintMathExpression(mathExpression1);
+        // PrintMathExpression(mathExpression2);
+        
+        // testOutputHelper.WriteLine(mathTerm.StringRepresentation);
+        // testOutputHelper.WriteLine(mathTerm2.StringRepresentation);
+        Assert.Equal(mathExpression1.StringRepresentation, mathExpression2.StringRepresentation);
+    }
+
+    [Fact]
+    public void TestLatexToMathParentheses()
+    {
+        MathVariable[] mathNumbers1 = // -57x^{2}xy
+        [ 
+            new MathVariable {
+                Name = 'x',
+                Exponent = 2
+            },
+            new MathVariable {
+                Name = 'x'
+            },
+            new MathVariable {
+                Name = 'y'
+            }
+        ];
+        
+        MathVariable[] mathNumbers2 = // 54xy
+        [
+            new MathVariable {
+                Name = 'x'
+            },
+            new MathVariable {
+                Name = 'y'
+            }
+        ];
+        
+        MathExpression mathExpression1 = new MathExpression(
+            new MathTerm(mathNumbers1) { Coefficient = -57 },
+            new MathTerm(mathNumbers2) { Coefficient = 54 }
+        );
+        MathExpression mathExpression2 = LatexExpressionToMathExpression("(-57x^{2}xy+54xy)(6x+9)");
         // PrintMathExpression(mathExpression1);
         // PrintMathExpression(mathExpression2);
         

@@ -1,45 +1,16 @@
-using static factorizer.MathClasses;
-using static factorizer.UtilityFunctions;
+namespace factorizer.Latex;
 
-namespace factorizer;
+using Models;
+using Exceptions;
+using static UtilityFunctions;
 
-public abstract class MathLatex
+public class LatexToMath
 {
     // public static readonly string[] MathOperations = ["\\cdot", "+", "-", "\\frac", "="];
     public static readonly string[] MathOperations = ["+", "-"];
 
     // 5y1x^{3}\cdot+-\frac{ }{ }=0
-    public static string MathTermToLatex(MathTerm mathTerm)  
-    {
-        // 5yx^{3} summthing like dis
-        string term = "";
-        // if (mathTerm.Coefficient != 1) term += $"{mathTerm.Coefficient}";
-        // PrintMathTerm(mathTerm);
-        if (mathTerm.Coefficient >= 0) term += "+";
-        if (mathTerm.Coefficient != 1) term += $"{mathTerm.Coefficient}";
-        
-        foreach (MathVariable variable in mathTerm.Variables)
-        {
-            term += variable.Name;
-            if (variable.Exponent != 1) term += "^{" + $"{variable.Exponent}" + "}";
-        }
-
-        return term;
-    }
-
-    public static string MathExpressionToLatex(MathExpression mathExpression)
-    {
-        // 5yx^{3}+3y summthing like dis
-        string expression = "";
-        // PrintMathExpression(mathExpression);
-        
-        foreach (MathTerm term in mathExpression.Terms)
-        {
-            expression += MathTermToLatex(term);
-        }
-
-        return expression;
-    }
+    
 
     public static MathTerm LatexTermToMathTerm(string latexTerm)
     {
@@ -105,7 +76,7 @@ public abstract class MathLatex
             }
             else if (gettingExponent && theChar == '}')
             {
-                if (lastAddedVariable == null) throw new ErrorHandling.LatexException(latexTerm);
+                if (lastAddedVariable == null) throw new LatexException(latexTerm);
                 gettingExponent = false;
                 int exponent = Int32.Parse(RemoveLastFromString(token));
                 lastAddedVariable.Exponent = exponent;
@@ -168,5 +139,95 @@ public abstract class MathLatex
         }
 
         return mathExpression;
+    }
+
+    enum SearchingFor
+    {
+        Nothing,
+        Parenthesis,
+        StartParenthesis,
+        EndParenthesis
+    }
+
+    // like: \left(6x+9\right)\left(9y+7\right)
+    public static MathParentheses LatexParenthesesToMathParentheses(string latexParentheses)
+    {
+        string startParenthesis = "\\left(";
+        string endParenthesis = "\\right)";
+        SearchingFor searchingFor = SearchingFor.Nothing;
+        List<string> tokens = [];
+        string token = "";
+        string searchingForToken = "";
+
+        foreach (char theChar in latexParentheses)
+        {
+            // Console.WriteLine(theChar);
+            if (theChar == '\\')
+            {
+                searchingFor = SearchingFor.Parenthesis;
+                searchingForToken += theChar;
+                continue;
+            }
+
+            if (searchingFor > 0) // if its trying to search for something (nothing=0)
+            {
+                // Console.WriteLine($"theChar : {theChar}");
+                // Console.WriteLine($"searchingFor: {searchingFor}");
+                // Console.WriteLine($"searchingForToken: {searchingForToken}\n");
+                
+                searchingForToken += theChar;
+                if (startParenthesis.StartsWith(searchingForToken))
+                {
+                    if (searchingForToken == startParenthesis)
+                    {
+                        Console.WriteLine($"{searchingForToken} = {startParenthesis}");
+                        searchingFor = SearchingFor.Nothing;
+                        tokens.Add(token);
+                        token = "";
+                        searchingForToken = "";
+                    }
+                    else
+                    {
+                        searchingFor = SearchingFor.StartParenthesis;
+                    }
+                    continue;
+                }
+                else if (endParenthesis.StartsWith(searchingForToken))
+                {
+                    if (searchingForToken == endParenthesis)
+                    {
+                        searchingFor = SearchingFor.Nothing;
+                        tokens.Add(token);
+                        token = "";
+                        searchingForToken = "";
+                    }
+                    else
+                    {
+                        searchingFor = SearchingFor.EndParenthesis;
+                    }
+                    continue;
+                }
+                else // its not looking for a parenthesis so we just ignore it
+                {
+                    token += searchingForToken;
+                    searchingForToken = "";
+                    searchingFor = SearchingFor.Nothing;
+                    continue;
+                }
+            }
+            
+            token += theChar;
+            Console.WriteLine($"token: {token}");
+            // Console.ReadLine();
+        }
+
+        List<MathExpression> mathExpressions = [];
+
+        foreach (string newToken in tokens)
+        {
+            if (newToken.Trim() == "") continue;
+            mathExpressions.Add(LatexExpressionToMathExpression(newToken));
+        }
+        return new MathParentheses(mathExpressions.ToArray()); 
     }
 }

@@ -12,7 +12,8 @@ internal static class Program
     
     private static void Main(string[] args)
     {
-        Console.WriteLine(int.Parse("-1"));
+        // Console.WriteLine(int.Parse("-1"));
+        Latex.LatexToMath.LatexParenthesesToMathParentheses("69x-6\\left(6x+9\\right)\\left(9y+7\\right)");
         // OldGetFactorsProgram(args);
         // Tests.TestAllTests();
         // TestGetFactors();
@@ -55,7 +56,41 @@ internal static class Program
             if (factors == null) return;
             OutputDoFactorsAddUpTo(factors, args[1]);
         }
-        else Console.WriteLine("Too many inputs, exiting...");
+        else
+        { 
+            List<NumberFactors> nums = [];
+            
+            foreach (string arg in args)
+            {
+                if (!int.TryParse(arg, out int num))
+                {
+                    Console.WriteLine($"arg {arg} was not a number");
+                    return;
+                }
+
+                NumberFactors? factors = OutputFactorsResult("", num);
+                if (factors != null) nums.Add(factors);
+            }
+
+            OutputCommonFactors(nums.ToArray());
+        }
+    }
+
+    private static void OutputCommonFactors(NumberFactors[] factorsArray)
+    {
+        int[] commonFactors = GetCommonFactors(factorsArray);
+        
+        if (commonFactors.Length == 0)
+        {
+            Console.WriteLine("\nNo common factors\n");
+            return;
+        }
+        Console.Write("\nCommon factors: ");
+        foreach (int factor in commonFactors)
+        {
+            Console.Write($"{factor}, ");
+        }
+        Console.WriteLine();
     }
     
 
@@ -82,6 +117,29 @@ internal static class Program
             return;
         }
         Console.WriteLine($"No factors add up the the sum: {sum}\n");
+    }
+
+    private static int[] GetCommonFactors(NumberFactors[] factorsArray)
+    {
+        if (factorsArray.Length == 0 || factorsArray.Length == 1) return [];
+
+        List<int> commonFactors = [];
+        NumberFactors ogFactor = factorsArray[0];
+        foreach (int factor in ogFactor.Factors)
+        {
+            bool commonFactor = true;
+            foreach (NumberFactors numberFactor in factorsArray)
+            {
+                if (!numberFactor.Factors.Contains(factor))
+                {
+                    commonFactor = false;
+                }
+            }
+            
+            if (commonFactor) commonFactors.Add(factor);
+        }
+
+        return commonFactors.ToArray();
     }
     
 
@@ -147,6 +205,7 @@ internal static class Program
         }
         
         int boundary = (int)Math.Ceiling(Math.Sqrt(num));
+        // Console.WriteLine(boundary);
         List<List<int>> factorPairs = [];
         List<int> factors = [];
 
@@ -157,7 +216,7 @@ internal static class Program
             return new NumberFactors(factorPairs, factors);
         }
 
-        for (int i = 1; i < boundary; i++)
+        for (int i = 1; i <= boundary; i++)
         {
             if (factors.Contains(i)) continue;
             if (num % i != 0) continue;

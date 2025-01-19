@@ -1,6 +1,6 @@
 using System.Collections;
 using factorizer;
-using static factorizer.MathClasses;
+using factorizer.Models;
 // ReSharper disable MemberCanBePrivate.Global
 
 namespace factorizer;
