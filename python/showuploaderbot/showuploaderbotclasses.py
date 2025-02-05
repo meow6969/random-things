@@ -2,6 +2,7 @@ from enum import Enum
 import json
 import os
 import pathlib
+import re
 import subprocess
 
 import natsort
@@ -221,8 +222,10 @@ class FilterComplexBuilder:
         match self.get_selector_type(selector_type):
             case SelectorType.GLOBAL:
                 return GlobalFilterComplex(self.filter_complex_dict[show_name], show_name)
+            case SelectorType.REGEX_FILENAME:
+                return RegexFilterComplex(self.filter_complex_dict[show_name], show_name)
             case SelectorType.EPISODE_RANGE:
-                return  EpisodeRangeFilterComplex(self.filter_complex_dict[show_name], show_name)
+                return EpisodeRangeFilterComplex(self.filter_complex_dict[show_name], show_name)
             case _:
                 raise Exception(f"{show_name} does not have a valid filter complex selector type!")
 
@@ -251,6 +254,8 @@ class ShowFilterComplex:
     video_stream_id: int = 0
     subtitle_stream_id: int | None = None
     audio_stream_id: int = 0
+    x_resolution: int = VIDEO_RESOLUTION[0]
+    y_resolution: int = VIDEO_RESOLUTION[1]
 
     def __init__(self, show_complex_dict: dict, show_name: str):
         self.show_complex_dict = show_complex_dict
@@ -269,6 +274,10 @@ class ShowFilterComplex:
             self.subtitle_stream_id = filter_complex_dict["subtitle-stream-id"]
         if "audio-stream-id" in filter_complex_dict.keys():
             self.audio_stream_id = filter_complex_dict["audio-stream-id"]
+        if "x-resolution" in filter_complex_dict.keys():
+            self.x_resolution = filter_complex_dict["x-resolution"]
+        if "y-resolution" in filter_complex_dict.keys():
+            self.y_resolution = filter_complex_dict["y-resolution"]
 
 
 class NoFilterComplex(ShowFilterComplex):
@@ -299,20 +308,41 @@ class GlobalFilterComplex(ShowFilterComplex):
         # input()
 
     def get_ffmpeg_filter_complex(self, video_path: str) -> list[str]:
-        return get_ffmpeg_filter_complex_from_values(video_path, self.video_stream_id, self.subtitle_stream_id,
-                                                     self.audio_stream_id)
+        return get_ffmpeg_filter_complex_from_values(
+            video_path, self.video_stream_id, self.subtitle_stream_id, self.audio_stream_id, None,
+            self.x_resolution, self.y_resolution
+        )
 
 
 class RegexFilterComplex(ShowFilterComplex):
+    regex_actions: dict
+
     def __init__(self, show_complex_dict=None, show_name=None):
         super().__init__({}, "")
-        raise NotImplementedError()
+        self.selector_type = SelectorType.REGEX_FILENAME
+        self.filter_complex_options_dict = show_complex_dict["filter-complex-regex-filename"]
+        self.regex_actions = self.filter_complex_options_dict["regex-actions"]
 
-    def get_ffmpeg_filter_complex(self, video_path: str = "") -> list[str]:
-        raise NotImplementedError()
+    def get_ffmpeg_filter_complex(self, video_path: str) -> list[str]:
+        ep_regex_action = self.get_regex_from_video_name(os.path.basename(video_path))
+        if ep_regex_action is None:
+            print(f"{CCs.WARNING}could not find a regex action for video {video_path}{CCs.ENDC}")
+        else:
+            self.set_video_stuff_from_filter_complex(ep_regex_action)
 
-    def post_video_file_conversion(self, destination_video_file_path: str):
-        raise NotImplementedError()
+        return get_ffmpeg_filter_complex_from_values(
+            video_path, self.video_stream_id, self.subtitle_stream_id, self.audio_stream_id, None,
+            self.x_resolution, self.y_resolution
+        )
+
+    def get_regex_from_video_name(self, video_name: str) -> dict | None:
+        for regex_action in self.regex_actions:
+            for regex_pattern in regex_action["regex-patterns"]:
+                if len(re.findall(regex_pattern, video_name)) == 0:
+                    continue
+                # print(f"{video_name}: {regex_action}")
+                return regex_action
+        return None
 
 
 class EpisodeRangeFilterComplex(ShowFilterComplex):
@@ -330,10 +360,11 @@ class EpisodeRangeFilterComplex(ShowFilterComplex):
             print(f"{CCs.WARNING}could not find a range action for video {video_path}{CCs.ENDC}")
         else:
             self.set_video_stuff_from_filter_complex(ep_range_action)
-        print(ep_range_action)
 
-        return get_ffmpeg_filter_complex_from_values(video_path, self.video_stream_id, self.subtitle_stream_id,
-                                                     self.audio_stream_id)
+        return get_ffmpeg_filter_complex_from_values(
+            video_path, self.video_stream_id, self.subtitle_stream_id, self.audio_stream_id, None,
+            self.x_resolution, self.y_resolution
+        )
 
     def get_range_from_video_name(self, video_name: str) -> dict | None:
         ep_compare_num = extract_ep_compare_num_from_video_name(video_name)
@@ -358,7 +389,7 @@ class VideoObject:
     name: str
     expected_size: float
     framerate: int
-    resolution: tuple[int, int]
+    # resolution: tuple[int, int]
     filter_complex: ShowFilterComplex
 
     def __init__(self, video_path: str, filter_complex: ShowFilterComplex = None):
@@ -368,20 +399,22 @@ class VideoObject:
         self.name = pathlib.Path(video_path).name
         self.expected_size = self.bitrate * self.t + self.audio_bitrate * self.t
         self.framerate = VIDEO_FRAMERATE
-        self.resolution = VIDEO_RESOLUTION
         if filter_complex is None:
             filter_complex = NoFilterComplex()
         self.filter_complex = filter_complex
+        # self.resolution = (self.filter_complex.x_resolution, self.filter_complex.y_resolution)
 
     def convert_file(self, destination_folder: str, destination_converted):
         pathlib.Path(destination_folder).parent.mkdir(parents=True, exist_ok=True)
         pathlib.Path(destination_converted).parent.mkdir(parents=True, exist_ok=True)
         destination_file = os.path.join(os.path.realpath(self.path), os.path.realpath(destination_folder))
+        ffmpeg_args = self.get_ffmpeg_arguments(destination_file)
         print(f"{CCs.OKCYAN}\n{self.name}, framerate={self.framerate}, b:v={self.bitrate}k, b:a={self.audio_bitrate}k, "
-              f"resolution={self.resolution}, exp_size={self.expected_size / 8 / 1000}MB{CCs.ENDC}")
+              f"resolution=({self.filter_complex.x_resolution}, {self.filter_complex.y_resolution}), "
+              f"exp_size={self.expected_size / 8 / 1000}MB{CCs.ENDC}")
         print(f"{CCs.OKCYAN}converting: {self.path} -> {change_extension_to_mp4(destination_folder)}{CCs.ENDC}")
         print(CCs.OKGREEN, end="")
-        if subprocess.run(self.get_ffmpeg_arguments(destination_file)).returncode == 0:
+        if subprocess.run(ffmpeg_args).returncode == 0:
             subprocess.run(["mv", "-v", self.path, destination_converted])
             self.filter_complex.post_video_file_conversion(destination_converted)
             print(CCs.ENDC, end="")

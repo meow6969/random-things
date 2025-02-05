@@ -199,15 +199,15 @@ def does_video_have_subtitles(video_path: str):
     return True
 
 
-def get_ffmpeg_scale_string():
-    if VIDEO_RESOLUTION[0] >= 0:
-        width = f"'min({VIDEO_RESOLUTION[0]},iw)'"
+def get_ffmpeg_scale_string(x_resolution: int = VIDEO_RESOLUTION[0], y_resolution: int = VIDEO_RESOLUTION[1]):
+    if x_resolution >= 0:
+        width = f"'min({x_resolution},iw)'"
     else:
-        width = f"{VIDEO_RESOLUTION[0]}"
-    if VIDEO_RESOLUTION[1] >= 0:
-        height = f"'min({VIDEO_RESOLUTION[1]},ih)'"
+        width = f"{x_resolution}"
+    if y_resolution >= 0:
+        height = f"'min({y_resolution},ih)'"
     else:
-        height = f"{VIDEO_RESOLUTION[1]}"
+        height = f"{y_resolution}"
     return f"{width}:{height}"
 
 
@@ -232,23 +232,28 @@ def get_ffmpeg_filter_complex_from_values(
         video_stream_id: int = 0,
         subtitle_stream_id: int | None = None,
         audio_stream_id: int = 0,
-        subtitle_file_path: pathlib.Path | None = None) -> list[str]:
+        subtitle_file_path: pathlib.Path | None = None,
+        x_resolution: int = VIDEO_RESOLUTION[0],
+        y_resolution: int = VIDEO_RESOLUTION[1]) -> list[str]:
     returned_filter_complex = ["-filter_complex"]
     filter_complex_options = ""
-    filter_complex_options += f"[0:v:{video_stream_id}]scale={get_ffmpeg_scale_string()}"
+    filter_complex_options += f"[0:v:{video_stream_id}]"
     if subtitle_file_path is not None:
-        filter_complex_options += "[vs];[vs]"
+        filter_complex_options += f"scale={get_ffmpeg_scale_string(x_resolution, y_resolution)}[vs];[vs]"
         if subtitle_file_path.suffix[1:] in TEXT_BASED_SUBTITLE_CODECS:
             filter_complex_options += f"subtitles={subtitle_file_path}"
             # print(filter_complex_options)
         elif subtitle_file_path.suffix[1:] in IMAGE_BASED_SUBTITLE_CODECS:
             raise NotImplementedError("havent implemented image based subtitles from file yet")
     elif subtitle_stream_id is not None and does_video_have_subtitles(video_path):
-        filter_complex_options += "[vs];[vs]"
         if subtitle_is_image_based(video_path, subtitle_stream_id):
-            filter_complex_options += f"[0:s:{subtitle_stream_id}]overlay"
+            filter_complex_options += (f"[0:s:{subtitle_stream_id}]overlay,scale="
+                                       f"{get_ffmpeg_scale_string(x_resolution, y_resolution)}")
         else:
+            filter_complex_options += f"scale={get_ffmpeg_scale_string(x_resolution, y_resolution)}[vs];[vs]"
             filter_complex_options += f"subtitles={video_path}:si={subtitle_stream_id}"
+    else:
+        filter_complex_options += f"scale={get_ffmpeg_scale_string(x_resolution, y_resolution)}"
     filter_complex_options += "[v]"
     returned_filter_complex += [filter_complex_options, "-map", "[v]", "-map", f"0:a:{audio_stream_id}"]
     # input(returned_filter_complex)
