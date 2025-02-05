@@ -1,7 +1,7 @@
 {
   "meta-comment": "all the fields ending in '-comment*' can be removed (including me!), they are just to help you set up the bot",
 
-  "token-comment": "the user token for the bot (must be a user account with nitro), type: str",
+  "token-comment": "the user token for the bot (must be a user account, nitro recommended), type: str",
   "token": "some.discord.user.token",
 
   "owners-comment": "list of discord user ids that have special privileges for the bot, type: list[int]",
