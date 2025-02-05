@@ -25,7 +25,7 @@
     "files-to-convert-dir": "/path/to/some/other/folder",
 
     "output-files-dir-comment": "this is the folder that the converted episode files are moved to, should almost always just be the shows-folder, type: str",
-    "output-files-dir": "/path/to/some/different/folder",
+    "output-files-dir": "/path/to/some/folder",
 
     "files-converted-dir-comment": "this is the folder that the original episode files are moved to after they are successfully converted, type: str",
     "files-converted-dir": "/path/to/some/weird/folder"
