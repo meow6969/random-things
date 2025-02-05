@@ -1,4 +1,5 @@
 using static factorizer.Latex.MathToLatex;
+using static factorizer.UtilityFunctions;
 
 using factorizer.Exceptions;
 
@@ -30,5 +31,21 @@ public class MathParentheses
             if (term.Id == id) return term;
         }
         throw new MathExpressionNotFoundException(this, id);
+    }
+    
+    public static void PrintMathParentheses(MathParentheses parenthesis, int indent=0)
+    {
+        PrintWithIndent("\nnew MathParenthesis:", indent);
+        indent++;
+        // Console.WriteLine($"term.StringRepresentation: {term.StringRepresentation}");
+        PrintWithIndent($"parenthesis.Id: {parenthesis.Id.ToString()}", indent);
+        PrintWithIndent($"parenthesis.StringRepresentation: {parenthesis.StringRepresentation}", indent);
+        // int varNum = 1;
+        foreach (MathExpression expression in parenthesis.Expressions)
+        {
+            // PrintWithIndent($"Expression {varNum}: ", indent, true);
+            MathExpression.PrintMathExpression(expression, indent); 
+            // varNum++;
+        }
     }
 }

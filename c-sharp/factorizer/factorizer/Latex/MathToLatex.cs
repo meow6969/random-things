@@ -19,14 +19,21 @@ public class MathToLatex
         // if (mathTerm.Coefficient != 1) term += $"{mathTerm.Coefficient}";
         // PrintMathTerm(mathTerm);
         if (mathTerm.Coefficient >= 0) term += "+";
-        if (mathTerm.Coefficient != 1) term += $"{mathTerm.Coefficient}";
-        
-        foreach (MathVariable variable in mathTerm.Variables)
-        {
-            term += MathVariableToLatex(variable);
-        }
+        if (mathTerm.Coefficient != 1 || mathTerm.Variables.Length == 0) term += $"{mathTerm.Coefficient}";
+        term += MathVariablesToLatex(mathTerm.Variables);
 
         return term;
+    }
+
+    public static string MathVariablesToLatex(MathVariable[] mathVariables)
+    {
+        string text = "";
+        foreach (MathVariable variable in mathVariables)
+        {
+            text += MathVariableToLatex(variable);
+        }
+
+        return text;
     }
 
     public static string MathExpressionToLatex(MathExpression mathExpression)

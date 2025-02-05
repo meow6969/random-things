@@ -7,179 +7,155 @@ namespace factorizer;
 
 public abstract class UtilityFunctions
 {
+    private const int IndentAmount = 4;
+    
     public static string RemoveLastFromString(string text, int lastToRemove=1)
     {
         // Console.WriteLine(text);
         // Console.WriteLine(text.Substring(0, text.Length - lastToRemove));
         return text.Substring(0, text.Length - lastToRemove);
     }
-
-    public static void PrintMathTerm(MathTerm term)
+    
+    public static void PrintWithIndent(string text, int indent, bool newLine=false)
     {
-        Console.WriteLine("\nnew MathTerm:");
-        // Console.WriteLine($"term.StringRepresentation: {term.StringRepresentation}");
-        Console.WriteLine($"term.Id: {term.Id.ToString()}");
-        Console.WriteLine($"term.StringRepresentation: {term.StringRepresentation}");
-        int varNum = 1;
-        foreach (MathVariable number in term.Variables)
-        {
-            Console.WriteLine($"\nVariable {varNum}: ");
-            PrintMathVariable(number);
-            varNum++;
-        }
-    }
-
-    public static void PrintMathExpression(MathExpression expression)
-    {
-        Console.WriteLine("\nnew MathExpression:");
-        // Console.WriteLine($"term.StringRepresentation: {term.StringRepresentation}");
-        Console.WriteLine($"expression.Id: {expression.Id.ToString()}");
-        Console.WriteLine($"expression.StringRepresentation: {expression.StringRepresentation}");
-        int varNum = 1;
-        foreach (MathTerm term in expression.Terms)
-        {
-            Console.WriteLine($"\nTerm {varNum}: ");
-            PrintMathTerm(term);
-            varNum++;
-        }
+        if (newLine) Console.Write('\n');
+        for (int i = 0; i < indent * IndentAmount; i++) Console.Write(' ');
+        Console.WriteLine(text);
     }
     
-    public static void PrintMathParenthesis(MathParentheses parenthesis)
+    // TODO: update this
+    public static NumberFactors GetFactors(int num)
     {
-        Console.WriteLine("\nnew MathParenthesis:");
-        // Console.WriteLine($"term.StringRepresentation: {term.StringRepresentation}");
-        Console.WriteLine($"parenthesis.Id: {parenthesis.Id.ToString()}");
-        Console.WriteLine($"parenthesis.StringRepresentation: {parenthesis.StringRepresentation}");
-        int varNum = 1;
-        foreach (MathExpression expression in parenthesis.Expressions)
+        if (num == 0) return new NumberFactors([[0, 0]], [0]);
+        bool negativeNum = false;
+        if (num < 0)
         {
-            Console.WriteLine($"\nTerm {varNum}: ");
-            PrintMathExpression(expression);
-            varNum++;
-        }
-    }
-
-    // public static void PrintMathNumber(MathNumber mathNumber)
-    // {
-    //     Console.WriteLine($"mathNumber.Coefficient: {mathNumber.Coefficient}");
-    //     Console.WriteLine($"mathNumber.Id: {mathNumber.Id}");
-    //     Console.WriteLine($"mathNumber.Exponent: {mathNumber.Exponent}");
-    //     if (mathNumber.Name == null) Console.WriteLine($"mathNumber.Name: null");
-    //     else Console.WriteLine($"mathNumber.Name: {mathNumber.Name}");
-    // }
-    
-    public static void PrintMathVariable(MathVariable mathNumber)
-    {
-        Console.WriteLine($"MathNumber.Id: {mathNumber.Id.ToString()}");
-        Console.WriteLine($"MathNumber.Exponent: {mathNumber.Exponent}");
-        Console.WriteLine($"MathNumber.Name: {mathNumber.Name}");
-    }
-    
-    public static MathTerm CombineMathTermMathNumbers(MathTerm term)
-    {
-        // Console.WriteLine(term.StringRepresentation);
-        
-        Dictionary<char, int> variableExponents = new Dictionary<char, int>();
-        foreach (MathVariable number in term.Variables)
-        {
-            if (!variableExponents.ContainsKey(number.Name)) variableExponents[number.Name] = 0;
-            variableExponents[number.Name] += number.Exponent;
-        }
-
-        MathTerm newTerm = new MathTerm { Coefficient = term.Coefficient };
-        foreach (char variableName in variableExponents.Keys)
-        {
-            newTerm.AddVariableToVariables(new MathVariable
-            {
-                Exponent = variableExponents[variableName],
-                Name = variableName
-            });
+            num = Math.Abs(num);
+            negativeNum = true;
         }
         
-        // Console.WriteLine(newTerm.StringRepresentation);
+        int boundary = (int)Math.Ceiling(num / 2f);
+        // Console.WriteLine(boundary);
+        List<List<int>> factorPairs = [];
+        List<int> factors = [];
 
-        return newTerm;
-    }
-    
-    public static Dictionary<char, int> MathTermVariablesToNameExponentDict(MathTerm term)
-    {
-        Dictionary<char, int> termVariables = [];
-        // we combine them here for reasons shut up ITS IMMPORTANT
-        // ok brah why r u so mean to me  :c
-        foreach (MathVariable variable in CombineMathTermMathNumbers(term).Variables)
+        if (IsPrime(num))
         {
-            termVariables[variable.Name] = variable.Exponent;
-        }
-
-        return termVariables;
-    }
-
-    public static MathExpression CombineMathExpressionMathTerms(MathExpression expression)
-    { 
-        // bro i cant figure out wtf is happenign anymore 
-        List<MathTerm> combinedTerms = [];
-        
-        // [      1,        2,        3]
-        // [1, 2, 3] [1, 2, 3] [1, 2, 3]
-        
-        // this gives us a unique list of MathTerms
-        combinedTerms.AddRange(expression.Terms.Select(CombineMathTermMathNumbers));
-
-        bool combinedATerm = true;
-        while (combinedATerm)
-        {
-            KeyValuePair<bool, MathTerm[]> temp = CombineMathTermsFromList(combinedTerms.ToArray());
-            combinedATerm = temp.Key;
-            combinedTerms = temp.Value.ToList();
-        }
-
-        return new MathExpression(combinedTerms.ToArray());
-    }
-    
-    private static KeyValuePair<bool, MathTerm[]> CombineMathTermsFromList(MathTerm[] combinedTerms)
-    {
-        bool combinedATerm = false;
-        
-        List<MathTerm> newTerms = [];
-        List<Guid> doneTerms = [];
-        
-        // we have to compare every term with every other term
-        int i = 0;
-        foreach (MathTerm term1 in combinedTerms)
-        {
-            if (doneTerms.Contains(term1.Id)) continue;
-            Dictionary<char, int> term1Variables = MathTermVariablesToNameExponentDict(term1);
+            Program.TrackFactors(factorPairs, factors, [1, num], negativeNum);
             
-            // we slice here because otherwise we would be comparing the same terms multiple times
-            foreach (MathTerm term2 in combinedTerms[i..])
-            {
-                if (doneTerms.Contains(term2.Id)) continue;
-                if (ReferenceEquals(term1, term2)) continue;
-                Dictionary<char, int> term2Variables = MathTermVariablesToNameExponentDict(term2);
-                if (!term1Variables.SequenceEqual(term2Variables)) continue;
-                // that means we can add them mtogether!!!!!!!!
-                MathTerm term2Replacement = new MathTerm
-                {
-                    Variables = term2.Variables,
-                    Coefficient = term1.Coefficient + term2.Coefficient
-                };
-                combinedATerm = true;
-                doneTerms.Add(term1.Id);
-                doneTerms.Add(term2.Id);
-                newTerms.Add(term2Replacement);
-            }
-
-            i += 1;
+            return new NumberFactors(factorPairs, factors);
         }
 
-        foreach (MathTerm term in combinedTerms)
+        for (int i = 1; i <= boundary; i++)
         {
-            if (!doneTerms.Contains(term.Id))
+            if (factors.Contains(i)) continue;
+            if (num % i != 0) continue;
+            
+            int otherNum = num / i;
+            List<int> factorPair = [i, otherNum];
+            Program.TrackFactors(factorPairs, factors, factorPair, negativeNum);
+        }
+        
+        factors.Sort();
+
+        return new NumberFactors(factorPairs, factors);
+    }
+    
+    public class NumberFactors(List<List<int>> factorPairs, List<int> factors)
+    {
+        public readonly List<List<int>> FactorPairs = factorPairs;
+        public readonly List<int> Factors = factors;
+
+        public void PrintFactors(bool duplicates = false)
+        {
+            string txt = "factors: ";
+            if (duplicates)
             {
-                newTerms.Add(term);
+                foreach (List<int> factorPair in FactorPairs)
+                {
+                    txt += $"{factorPair[0]}, {factorPair[1]}, ";
+                }
             }
+            else
+            {
+                foreach (int factor in Factors)
+                {
+                    txt += $"{factor}, ";
+                }
+            }
+        
+            Console.WriteLine(txt[..^2]);
+        }
+    
+        public void PrintPrimeFactors(bool duplicates = false)
+        {
+            string txt = "prime factors: ";
+            if (duplicates)
+            {
+                foreach (List<int> factorPair in FactorPairs)
+                {
+                    if (IsPrime(factorPair[0])) txt += $"{factorPair[0]}, ";
+                    if (IsPrime(factorPair[1])) txt += $"{factorPair[1]}, ";
+                }
+            }
+            foreach (int factor in Factors)
+            {
+                if (!IsPrime(factor)) continue;
+                txt += $"{factor}, ";
+            }
+            Console.WriteLine(txt[..^2]);
+        }
+    }
+    
+    public static bool IsPrime(int num)
+    {
+        num = Math.Abs(num);
+
+        switch (num)
+        {
+            case 0:
+                return false;
+            case 1 or 2:
+                return true;
         }
 
-        return new KeyValuePair<bool, MathTerm[]>(combinedATerm, newTerms.ToArray());
+        if (num % 2 == 0) return false;
+
+        int boundary = (int)Math.Ceiling(num / 2f);
+        for (int i = 3; i <= boundary; i+= 2)
+            if (num % i == 0)
+                return false;
+        return true;
+    }
+    
+    public static int ManyMin(params int[] nums)
+    {
+        int lowestNum = int.MaxValue;
+        foreach (int num in nums) lowestNum = Math.Min(lowestNum, num);
+        return lowestNum;
+    }
+
+    public static void PrintDict<TKey, TValue>(Dictionary<TKey, TValue> dictionary) where TKey : notnull
+    {
+        foreach (TKey theKey in dictionary.Keys)
+        {
+            Console.WriteLine($"{theKey}: {dictionary[theKey]}");
+        }
+    }
+    
+    public static void PrintList<T>(List<T> list)
+    {
+        for (int i = 0; i < list.Count; i++)
+        {
+            Console.WriteLine($"index={i}: {list[i]}");
+        }
+    }
+    
+    public static void PrintArray<T>(T[] array)
+    {
+        for (int i = 0; i < array.Length; i++)
+        {
+            Console.WriteLine($"index={i}: {array[i]}");
+        }
     }
 }

@@ -1,3 +1,4 @@
+using factorizer;
 using factorizer.Models;
 using static factorizer.Latex.LatexToMath;
 using static factorizer.UtilityFunctions;
@@ -8,184 +9,62 @@ namespace factorizerTest;
 public class UnitTests(ITestOutputHelper testOutputHelper)
 {
     [Fact]
-    public void TestMathTermToLatex()
-    {
-        MathVariable[] mathNumbers =
-        [
-            new MathVariable
-            {
-                Name = 'y'
-            },
-            new MathVariable
-            {
-                Name = 'x',
-                Exponent = 3
-            }
-        ];
-
-        MathTerm mathTerm = new MathTerm(mathNumbers)
-        {
-            Coefficient = 5
-        };
-
-        // testOutputHelper.WriteLine(mathTerm.StringRepresentation);
-    
-        Assert.Equal("+5yx^{3}", mathTerm.StringRepresentation);
-    }
-    
-    [Fact]
-    public void TestMathTermStringRepresentation()
-    {
-        MathVariable[] mathNumbers =
-        [
-            new MathVariable
-            {
-                Exponent = 3,
-                Name = 'y'
-            },
-            new MathVariable
-            {
-                Name = 'x',
-                Exponent = 3
-            }
-        ];
-
-        MathTerm mathTerm = new MathTerm(mathNumbers)
-        {
-            Coefficient = 5
-        };
-    
-        // testOutputHelper.WriteLine(mathTerm.StringRepresentation);
-        mathTerm.GetVariablesByName('x')[0].Exponent = 4;
-        mathTerm.GetVariablesByName('y')[0].Exponent = 69;
-        // testOutputHelper.WriteLine(mathTerm.StringRepresentation);
-        
-        Assert.Equal("+5y^{69}x^{4}", mathTerm.StringRepresentation);
-        // Assert.Equal("+5y^{3}x^{3}", mathTerm.StringRepresentation);
-    }
-
-    [Fact]
-    public void TestLatexToMathTerm()
-    {
-        MathVariable[] mathNumbers = // x^{2}6x9y
-        [ 
-            new MathVariable {
-                Name = 'x',
-                Exponent = 2
-            },
-            new MathVariable {
-                Name = 'x'
-            },
-            new MathVariable {
-                Name = 'y'
-            }
-        ];
-        
-        MathTerm mathTerm = new MathTerm(mathNumbers)
-        {
-            Coefficient = 54
-        };
-        MathTerm mathTerm2 = LatexTermToMathTerm("x^{2}6x9y");
-        // testOutputHelper.WriteLine(mathTerm.StringRepresentation);
-        // testOutputHelper.WriteLine(mathTerm2.StringRepresentation);
-        Assert.Equal(mathTerm.StringRepresentation, mathTerm2.StringRepresentation);
-    }
-    
-    [Fact]
-    public void TestLatexToMathExpression()
-    {
-        MathVariable[] mathNumbers1 = // -57x^{2}xy
-        [ 
-            new MathVariable {
-                Name = 'x',
-                Exponent = 2
-            },
-            new MathVariable {
-                Name = 'x'
-            },
-            new MathVariable {
-                Name = 'y'
-            }
-        ];
-        
-        MathVariable[] mathNumbers2 = // 54xy
-        [
-            new MathVariable {
-                Name = 'x'
-            },
-            new MathVariable {
-                Name = 'y'
-            }
-        ];
-        
-        MathExpression mathExpression1 = new MathExpression(
-            new MathTerm(mathNumbers1) { Coefficient = -57 },
-            new MathTerm(mathNumbers2) { Coefficient = 54 }
-            );
-        MathExpression mathExpression2 = LatexExpressionToMathExpression("-57x^{2}xy+54xy");
-        // PrintMathExpression(mathExpression1);
-        // PrintMathExpression(mathExpression2);
-        
-        // testOutputHelper.WriteLine(mathTerm.StringRepresentation);
-        // testOutputHelper.WriteLine(mathTerm2.StringRepresentation);
-        Assert.Equal(mathExpression1.StringRepresentation, mathExpression2.StringRepresentation);
-    }
-
-    [Fact]
-    public void TestLatexToMathParentheses()
-    {
-        // \\left(69x^{2}-6\\right)\\left(6x+9\\right)\\left(9y+7\\right)
-        
-        MathExpression mathExpression1 = new MathExpression(
-            new MathTerm([
-                new MathVariable {
-                    Name = 'x',
-                    Exponent = 2
-                }
-            ]) { Coefficient = 69 },
-            new MathTerm { Coefficient = -6 }
-        );
-        
-        MathExpression mathExpression2 = new MathExpression(
-            new MathTerm([
-                new MathVariable {
-                    Name = 'x'
-                }
-            ]) { Coefficient = 6 },
-            new MathTerm { Coefficient = 9 }
-        );
-        MathExpression mathExpression3 = new MathExpression(
-            new MathTerm([
-                new MathVariable {
-                    Name = 'y'
-                }
-            ]) { Coefficient = 9 },
-            new MathTerm { Coefficient = 7 }
-        );
-
-        MathParentheses mathParenthesis1 = new MathParentheses([
-            mathExpression1,
-            mathExpression2,
-            mathExpression3
-        ]);
-        
-        MathParentheses mathParenthesis2 = 
-            LatexParenthesesToMathParentheses("\\left(69x^{2}-6\\right)\\left(6x+9\\right)\\left(9y+7\\right)");
-        // PrintMathExpression(mathExpression1);
-        // PrintMathExpression(mathExpression2);
-        
-        testOutputHelper.WriteLine(mathParenthesis1.StringRepresentation);
-        testOutputHelper.WriteLine(mathParenthesis2.StringRepresentation);
-        Assert.Equal(mathParenthesis1.StringRepresentation, mathParenthesis2.StringRepresentation);
-    }
-
-    [Fact]
     public void TestCombineMathExpressionMathTerms()
     {
         MathExpression mathExpression1 = LatexExpressionToMathExpression("-47x^{3}y+5y^{4}");
         MathExpression mathExpression2 = LatexExpressionToMathExpression("-57x^{2}xy+5x^{2}xy2+2y^{4}+3y^{4}");
-        mathExpression2 = CombineMathExpressionMathTerms(mathExpression2);
+        mathExpression2 = MathExpression.CombineMathExpressionMathTerms(mathExpression2);
         
         Assert.Equal(mathExpression1.StringRepresentation, mathExpression2.StringRepresentation);
+    }
+
+    [Fact]
+    public void TestFactorRuleGreatestCommonFactor()
+    {
+        MathExpression mathExpression1 = LatexExpressionToMathExpression("10w^{3}+13w^{2}-3w");
+        MathParentheses mathExpression2 = LatexParenthesesToMathParentheses("(w)(10w^{2}+13w-3)");
+        
+        
+    }
+    
+    [Fact]
+    public void TestMathExpressionCommonFactors()
+    {
+        MathExpression mathExpression1 = LatexExpressionToMathExpression("10w^{3}+15w^{2}-5w");
+        // testOutputHelper.WriteLine(mathExpression1.StringRepresentation);
+        MathExpressionCommonFactors commonFactors = MathExpressionCommonFactors.FromExpression(mathExpression1);
+        string testText = $"{commonFactors.CoefficientCommonFactors[3]}, ";
+        foreach (MathVariable mathVar in commonFactors.VariableCommonFactors)
+        {
+            testText += $"{mathVar.Name}^{mathVar.Exponent}";
+            // testOutputHelper.WriteLine(mathVar.StringRepresentation);
+        }
+
+        Assert.Equal("5, w^1", testText);
+    }
+    
+    [Fact]
+    public void TestMathExpressionGreatestCommonFactor()
+    {
+        MathExpression mathExpression1 = LatexExpressionToMathExpression("10w^{3}+15w^{2}-5w");
+        // testOutputHelper.WriteLine(mathExpression1.StringRepresentation);
+        MathExpressionCommonFactors commonFactors = MathExpressionCommonFactors.FromExpression(mathExpression1);
+        string testText = $"{commonFactors.CoefficientCommonFactors[3]}, ";
+        foreach (MathVariable mathVar in commonFactors.VariableCommonFactors)
+        {
+            testText += $"{mathVar.Name}^{mathVar.Exponent}";
+            // testOutputHelper.WriteLine(mathVar.StringRepresentation);
+        }
+
+        Assert.Equal("5, w^1", testText);
+    }
+    
+    [Fact]
+    public void TestFactoringRuleGreatestCommonFactor()
+    {
+        MathExpression mathExpression1 = LatexExpressionToMathExpression("10w^{3}+15w^{2}-5w");
+        MathParentheses factored = FactoringRules.GreatestCommonFactor(mathExpression1);
+
+        Assert.Equal("(+5w)(2w^{2}+3w-1)", factored.StringRepresentation);
     }
 }
