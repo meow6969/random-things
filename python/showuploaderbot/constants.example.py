@@ -18,6 +18,6 @@ MIN_AUDIO_BITRATE_KBITS = 48           # literally no reason i picked this just 
 FILTER_COMPLEX_BUILDER_JSON_PATH = "filter_complex_builder.json"
 
 # these shouldnt need to be changed
-IMAGE_BASED_SUBTITLE_CODECS = ["dvbsub", "dvdsub", "pgssub", "xsub"]
+IMAGE_BASED_SUBTITLE_CODECS = ["dvbsub", "dvdsub", "pgssub", "xsub", "hdmv_pgs_subtitle"]
 TEXT_BASED_SUBTITLE_CODECS = ["ssa", "ass", "webvtt", "jacosub", "microdvd", "mov_text", "mpl2", "pjs", "realtext",
                               "sami", "stl", "subrip", "subviewer", "subviewer1", "text", "vplayer", "webvtt", "srt"]

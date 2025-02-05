@@ -11,7 +11,8 @@ import discord
 from showuploaderbotfuncs import (change_extension_to_mp4, convert_str_or_bytes_to_str,
                                   extract_season_number_from_folder_name, get_ffmpeg_filter_complex_from_values,
                                   get_file_subtitle_from_video_path, is_file_video, update_progress_tracker,
-                                  verify_show_folder_structure_from_path, wait_between_uploads)
+                                  verify_show_folder_structure_from_path, wait_between_uploads,
+                                  extract_ep_compare_num_from_video_name)
 from ihatecircularimport import CCs, ensure_constants_py_exists
 ensure_constants_py_exists()
 from constants import *
@@ -189,6 +190,7 @@ class SelectorType(Enum):
     GLOBAL = 0
     SEASON = 1
     REGEX_FILENAME = 2
+    EPISODE_RANGE = 3
 
 
 class FilterComplexBuilder:
@@ -211,9 +213,16 @@ class FilterComplexBuilder:
     def get_filter_complex(self, show_name: str):
         if show_name not in self.filter_complex_dict.keys():
             return NoFilterComplex({}, "")
-        match self.get_selector_type(self.filter_complex_dict[show_name]["filter-complex-selector-type"]):
+        selector_type: str | int = self.filter_complex_dict[show_name]["filter-complex-selector-type"]
+        if isinstance(selector_type, str):
+            if selector_type.isnumeric():
+                selector_type = int(selector_type)
+
+        match self.get_selector_type(selector_type):
             case SelectorType.GLOBAL:
                 return GlobalFilterComplex(self.filter_complex_dict[show_name], show_name)
+            case SelectorType.EPISODE_RANGE:
+                return  EpisodeRangeFilterComplex(self.filter_complex_dict[show_name], show_name)
             case _:
                 raise Exception(f"{show_name} does not have a valid filter complex selector type!")
 
@@ -227,6 +236,8 @@ class FilterComplexBuilder:
                     return SelectorType.SEASON
                 case "regex-filename":
                     return SelectorType.REGEX_FILENAME
+                case "episode-range":
+                    return SelectorType.EPISODE_RANGE
                 case _:
                     raise Exception(f"invalid selector_type! got {selector_type}")
         return SelectorType(selector_type)
@@ -237,6 +248,9 @@ class ShowFilterComplex:
     filter_complex_options_dict: dict
     show_name: str
     selector_type: SelectorType
+    video_stream_id: int = 0
+    subtitle_stream_id: int | None = None
+    audio_stream_id: int = 0
 
     def __init__(self, show_complex_dict: dict, show_name: str):
         self.show_complex_dict = show_complex_dict
@@ -247,6 +261,14 @@ class ShowFilterComplex:
 
     def post_video_file_conversion(self, output_destination: str):
         pass
+
+    def set_video_stuff_from_filter_complex(self, filter_complex_dict):
+        if "video-stream-id" in filter_complex_dict.keys():
+            self.video_stream_id = filter_complex_dict["video-stream-id"]
+        if "subtitle-stream-id" in filter_complex_dict.keys():
+            self.subtitle_stream_id = filter_complex_dict["subtitle-stream-id"]
+        if "audio-stream-id" in filter_complex_dict.keys():
+            self.audio_stream_id = filter_complex_dict["audio-stream-id"]
 
 
 class NoFilterComplex(ShowFilterComplex):
@@ -266,8 +288,22 @@ class NoFilterComplex(ShowFilterComplex):
                         str(pathlib.Path(destination_video_file_path).parent)])
 
 
-class RegexFilterComplex(ShowFilterComplex):
+class GlobalFilterComplex(ShowFilterComplex):
+    def __init__(self, show_complex_dict: dict, show_name: str):
+        super().__init__(show_complex_dict, show_name)
+        self.selector_type = SelectorType.GLOBAL
+        self.filter_complex_options_dict = show_complex_dict["filter-complex-global"]
+        self.set_video_stuff_from_filter_complex(self.filter_complex_options_dict)
+        # print(show_name)
+        # print(json.dumps(show_complex_dict, indent=2))
+        # input()
 
+    def get_ffmpeg_filter_complex(self, video_path: str) -> list[str]:
+        return get_ffmpeg_filter_complex_from_values(video_path, self.video_stream_id, self.subtitle_stream_id,
+                                                     self.audio_stream_id)
+
+
+class RegexFilterComplex(ShowFilterComplex):
     def __init__(self, show_complex_dict=None, show_name=None):
         super().__init__({}, "")
         raise NotImplementedError()
@@ -279,28 +315,39 @@ class RegexFilterComplex(ShowFilterComplex):
         raise NotImplementedError()
 
 
-class GlobalFilterComplex(ShowFilterComplex):
-    video_stream_id: int = 0
-    subtitle_stream_id: int | None = None
-    audio_stream_id: int = 0
+class EpisodeRangeFilterComplex(ShowFilterComplex):
+    range_actions: dict
 
-    def __init__(self, show_complex_dict: dict, show_name: str):
-        super().__init__(show_complex_dict, show_name)
-        self.selector_type = SelectorType.GLOBAL
-        self.filter_complex_options_dict = show_complex_dict["filter-complex-global"]
-        # print(show_name)
-        # print(json.dumps(show_complex_dict, indent=2))
-        # input()
-        if "video-stream-id" in self.filter_complex_options_dict.keys():
-            self.video_stream_id = self.filter_complex_options_dict["video-stream-id"]
-        if "subtitle-stream-id" in self.filter_complex_options_dict.keys():
-            self.subtitle_stream_id = self.filter_complex_options_dict["subtitle-stream-id"]
-        if "audio-stream-id" in self.filter_complex_options_dict.keys():
-            self.audio_stream_id = self.filter_complex_options_dict["audio-stream-id"]
+    def __init__(self, show_complex_dict=None, show_name=None):
+        super().__init__({}, "")
+        self.selector_type = SelectorType.EPISODE_RANGE
+        self.filter_complex_options_dict = show_complex_dict["filter-complex-episode-range"]
+        self.range_actions = self.filter_complex_options_dict["range-actions"]
 
     def get_ffmpeg_filter_complex(self, video_path: str) -> list[str]:
+        ep_range_action = self.get_range_from_video_name(os.path.basename(video_path))
+        if ep_range_action is None:
+            print(f"{CCs.WARNING}could not find a range action for video {video_path}{CCs.ENDC}")
+        else:
+            self.set_video_stuff_from_filter_complex(ep_range_action)
+        print(ep_range_action)
+
         return get_ffmpeg_filter_complex_from_values(video_path, self.video_stream_id, self.subtitle_stream_id,
                                                      self.audio_stream_id)
+
+    def get_range_from_video_name(self, video_name: str) -> dict | None:
+        ep_compare_num = extract_ep_compare_num_from_video_name(video_name)
+        for range_action in self.range_actions:
+            for episode_range in range_action["episode-ranges"]:
+                ep_r_cmpre0 = extract_ep_compare_num_from_video_name(episode_range[0])
+                ep_r_cmpre1 = extract_ep_compare_num_from_video_name(episode_range[1])
+                if ep_r_cmpre0 > ep_r_cmpre1:
+                    raise Exception(f"invalid episode_range: {episode_range}")
+
+                if ep_r_cmpre0 <= ep_compare_num <= ep_r_cmpre1:
+                    # print(f"{CCs.OKGREEN}{episode_file_name} fits in {episode_range}{CCs.ENDC}")
+                    return range_action
+        return None
 
 
 class VideoObject:

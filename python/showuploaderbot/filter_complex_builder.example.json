@@ -1,13 +1,13 @@
 {
   "show-folder-name": {
-    "filter-complex-selector-type": "global/0 | season/1 | regex-filename/2",
+    "filter-complex-selector-type": "global/0 | season/1 | regex-filename/2 | episode-range/3, type: str | int",
     "filter-complex-regex-filename": {
-      "get-from-symlink-absolute-path": "bool: default=false",
-      "regex-patterns": [
+      "regex-actions": [
         {
-          "regex-pattern": "regex-pattern (NOTE: not implemented yet)",
+          "regex-patterns": ["a list of regex patterns that, if found, will select this action as the proper settings for the episode"],
+          "use-realpath-instead-of-normal-path": "primarily for symlinks, type: bool = false",
           "video-stream-id": "int: default=0",
-          "subtitle-id": "int | null",
+          "subtitle-stream-id": "int | null",
           "audio-stream-id": "int: default=0"
         }
       ]

@@ -5,6 +5,7 @@ import os
 import pathlib
 import random
 import subprocess
+import typing
 
 import natsort
 
@@ -102,7 +103,38 @@ def extract_season_number_from_folder_name(season_folder_name: str) -> int:
     return int(season_folder_name[1:])
 
 
-def get_subtitle_info_from_video(video_path: str, subtitle_index=0) -> dict:
+def extract_season_and_episode_number_from_video_name(video_name: str) -> tuple[int, int]:
+    if not video_name.startswith("S"):
+        raise Exception(f"invalid video name: {video_name} must be in format: SXXEXX.ext")
+    season_number = None
+    season_number_length = None
+    episode_number = None
+    episode_number_length = None
+    token = ""
+    for letter in video_name[1:]:
+        if letter == ".":
+            episode_number = int(token)
+            episode_number_length = len(token)
+            break
+        if letter.upper() == "E":
+            season_number = int(token)
+            season_number_length = len(token)
+            token = ""
+            continue
+        if letter.isdigit():
+            token += letter
+    if season_number is None or episode_number is None:
+        raise Exception(f"invalid video name: {video_name} must be in format: SXXEXX.ext")
+    return season_number, episode_number  # , season_number_length, episode_number_length
+
+
+def extract_ep_compare_num_from_video_name(video_name: str) -> int:
+    s_num, ep_num = extract_season_and_episode_number_from_video_name(video_name)
+    return int(f"{s_num}{ep_num:03d}")
+
+
+def get_all_subtitles_info_from_video(video_path: str) -> list[dict]:
+    all_subtitles_info = []
     result = subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "stream", "-of", "json", video_path],
         stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
@@ -114,11 +146,39 @@ def get_subtitle_info_from_video(video_path: str, subtitle_index=0) -> dict:
         current_subtitle_index = 0
         # im pretty sure the output of this is always in order
         if stream_entry["codec_type"] == "subtitle":
-            if current_subtitle_index == subtitle_index:
-                return stream_entry
-            current_subtitle_index += 1
-    # raise Exception(f"could not find subtitle index {subtitle_index} from video: {video_path}")
-    return {}
+            all_subtitles_info.append(stream_entry)
+    return all_subtitles_info
+
+
+def get_subtitle_info_from_video(video_path: str, subtitle_index=0) -> dict:
+    # im pretty sure the output of this is always in correct order
+    video_subtitles_info = get_all_subtitles_info_from_video(video_path)
+    try:
+        return video_subtitles_info[subtitle_index]
+    except IndexError:
+        print(f"{CCs.WARNING}showuploaderbotfuncs.get_subtitle_info_from_video(): "
+              f"could not find subtitle index {subtitle_index} from video: {video_path}{CCs.ENDC}")
+        return {}
+
+
+# key format should be: "tags/language" corresponds to: subtitles_info[x]["tags"]["language"]
+# if a subtitle info does not have the key it just becomes None
+def get_list_of_dict_keys_as_dict_list(the_list_dict: list[dict], *keys: str) -> dict[str, list]:
+    returned_dict: dict[str, list] = {}
+    for the_key in keys:
+        true_keys = the_key.split("/")
+        for i in range(len(the_list_dict)):
+            found_val = the_list_dict[i]
+            for truer_key in true_keys:
+                if not isinstance(found_val, dict) or truer_key not in found_val.keys():
+                    found_val = None
+                    break
+                found_val = found_val[truer_key]
+            if the_key not in returned_dict:
+                returned_dict[the_key] = [found_val]
+            else:
+                returned_dict[the_key].append(found_val)
+    return returned_dict
 
 
 def subtitle_is_image_based(video_path: str, subtitle_index=0) -> bool:
@@ -207,3 +267,40 @@ def ensure_config_json_exists() -> None:
         print(f"{CCs.FAIL}showuploaderbotfuncs.ensure_config_json_exists(): could not find config.json! "
               f"please copy and paste config.example.json as config.json and fill out the required fields!{CCs.ENDC}")
         exit(1)
+
+
+def is_object_hashable(the_object):
+    return isinstance(the_object, typing.Hashable)
+
+
+def ensure_object_is_hashable(the_thing) -> tuple | None:
+    if isinstance(the_thing, list) or isinstance(the_thing, dict):
+        return turn_dict_or_list_to_many_objects_tuple(the_thing)
+    if not is_object_hashable(the_thing):
+        raise Exception(f"{CCs.FAIL}showuploaderbotfuncs.turn_list_of_lists_to_many_objects_list(): "
+                        f"cannot convert type: {type(the_thing)}{CCs.ENDC}")
+    return None
+
+
+def turn_dict_or_list_to_many_objects_tuple(list_or_dict: dict | list) -> tuple:
+    returned_list = []
+    is_dict = isinstance(list_or_dict, dict)
+    for the_key in list_or_dict:
+        if is_dict:
+            returned_list.append(the_key)
+            the_value = list_or_dict[the_key]
+        else:
+            the_value = the_key
+        ensurance = ensure_object_is_hashable(the_value)
+        if ensurance is not None:
+            returned_list += ensurance
+            continue
+        returned_list.append(the_value)
+    return tuple(returned_list)
+
+
+def hash_dict_or_list(the_thing: dict | list) -> int:
+    the_tuple = turn_dict_or_list_to_many_objects_tuple(the_thing)
+    the_hash = hash(the_tuple)
+    # print(f"{the_hash}: {the_tuple}")
+    return the_hash
