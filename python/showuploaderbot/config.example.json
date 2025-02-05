@@ -1,23 +1,32 @@
 {
   "meta-comment": "all the fields ending in '-comment*' can be removed, they are just to help you set up the bot",
+
   "token-comment": "the user token for the bot (must be a user account with nitro), type: str",
   "token": "some.discord.user.token",
+
   "owners-comment": "list of discord user ids that have special privileges for the bot, type: list[int]",
   "owners": [1234567890],
+
   "shows-folder-comment": "folder with all of the shows you want to upload to discord, type: str",
   "shows-folder-comment-2": "folder structure should be 'shows-folder/show-name/s01/s01e01.mp4'",
   "shows-folder": "/path/to/some/folder",
+
   "shows-server-id-comment": "the server that the episodes will be uploaded to, type: int",
   "shows-server-id": 1234567890987654321,
+
   "minutes-to-wait-between-uploads-comment": "how many minutes to wait between uploads, prevents discord from flagging us as a bot, type: int = 4",
   "minutes-to-wait-between-uploads": 4,
+
   "video-converter-settings-comment": "special arguments only for the episode converter that automatically converts files to a type uploadable to discord, type: dict[str, str]",
   "video-converter-settings": {
+
     "files-to-convert-dir-comment": "directory that contains all of the shows you want to convert, type: str",
     "files-to-convert-dir-comment-2": "folder structure should be the same as the shows-folder structure",
     "files-to-convert-dir": "/path/to/some/other/folder",
+
     "output-files-dir-comment": "this is the folder that the converted episode files are moved to, should almost always just be the shows-folder, type: str",
     "output-files-dir": "/path/to/some/different/folder",
+    
     "files-converted-dir-comment": "this is the folder that the original episode files are moved to after they are successfully converted, type: str",
     "files-converted-dir": "/path/to/some/weird/folder"
   }
