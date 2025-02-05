@@ -1,5 +1,5 @@
 {
-  "meta-comment": "all the fields ending in '-comment*' can be removed, they are just to help you set up the bot",
+  "meta-comment": "all the fields ending in '-comment*' can be removed (including me!), they are just to help you set up the bot",
 
   "token-comment": "the user token for the bot (must be a user account with nitro), type: str",
   "token": "some.discord.user.token",
@@ -26,7 +26,7 @@
 
     "output-files-dir-comment": "this is the folder that the converted episode files are moved to, should almost always just be the shows-folder, type: str",
     "output-files-dir": "/path/to/some/different/folder",
-    
+
     "files-converted-dir-comment": "this is the folder that the original episode files are moved to after they are successfully converted, type: str",
     "files-converted-dir": "/path/to/some/weird/folder"
   }
