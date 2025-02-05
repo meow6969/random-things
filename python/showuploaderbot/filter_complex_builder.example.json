@@ -1,0 +1,24 @@
+{
+  "show-folder-name": {
+    "filter-complex-selector-type": "global/0 | season/1 | regex-filename/2",
+    "filter-complex-regex-filename": {
+      "get-from-symlink-absolute-path": "bool: default=false",
+      "regex-patterns": [
+        {
+          "regex-pattern": "regex-pattern (NOTE: not implemented yet)",
+          "video-stream-id": "int: default=0",
+          "subtitle-id": "int | null",
+          "audio-stream-id": "int: default=0"
+        }
+      ]
+    }
+  },
+  "show-2-folder-name": {
+    "filter-complex-selector-type": "0 (global)",
+    "filter-complex-global": {
+      "video-stream-id": "int: default=0",
+      "subtitle-stream-id": "int | null: default=null",
+      "audio-stream-id": "int: default=0"
+    }
+  }
+}

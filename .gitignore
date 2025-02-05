@@ -21,3 +21,15 @@ text_old2.txt
 
 # this is in the upload_stats nicotine+ plugin
 nicotine-plus.db
+
+# this is the config file for the show uploader bot that includes the user token
+python/showuploaderbot/config.json
+# this is the config for the filter complex config
+# doesnt really contain sensitive info but shouldnt be included
+python/showuploaderbot/filter_complex_builder.json
+# these are the constants for the video converter
+# again doesnt contain sensitive info but shouldnt be included
+python/showuploaderbot/constants.py
+# progress tracker for show uploader bot
+# again, no sensitive info but shouldnt be included
+python/showuploaderbot/progress_tracker.json
