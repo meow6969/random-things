@@ -250,6 +250,13 @@ async def on_ready():
     await sync_all_uploads(client.shows_folder)
 
 
+@client.command()
+async def about(ctx):
+    await ctx.send("hello! i am show uploader bot! i upload ur fav tv shows!!\n"
+                   "source code here: https://github.com/meow6969/random-things/tree/main/python/showuploaderbot\n"
+                   "check if out if u want!")
+
+
 if __name__ == "__main__":
     ensure_config_json_exists()
     with open("config.json") as meow:
