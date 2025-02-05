@@ -11,7 +11,7 @@
   "shows-server-id": 1234567890987654321,
   "minutes-to-wait-between-uploads-comment": "how many minutes to wait between uploads, prevents discord from flagging us as a bot, type: int = 4",
   "minutes-to-wait-between-uploads": 4,
-  "video-converter-settings-comment": "special arguments only for the episode converter that automatically converts files to a type uploadable to discord, type: dict",
+  "video-converter-settings-comment": "special arguments only for the episode converter that automatically converts files to a type uploadable to discord, type: dict[str, str]",
   "video-converter-settings": {
     "files-to-convert-dir-comment": "directory that contains all of the shows you want to convert, type: str",
     "files-to-convert-dir-comment-2": "folder structure should be the same as the shows-folder structure",
