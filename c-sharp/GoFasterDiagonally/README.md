@@ -5,4 +5,5 @@ this normalizes the speed so no matter what direction u go it will always be equ
   
 this undoes that so when u go diagonally u go baseSpeed*sqrt(2)  
 its super awesome!!  
+latest release: https://github.com/meow6969/random-things/releases/tag/GFDv1.0.0  
 ![im a gamer](https://media1.tenor.com/m/sdEjblumcWgAAAAC/omori-kel.gif)
