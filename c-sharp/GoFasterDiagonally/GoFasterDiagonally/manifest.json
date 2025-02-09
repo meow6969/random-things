@@ -1,0 +1,10 @@
+{
+  "Name": "GoFasterDiagonally",
+  "Author": "meow",
+  "Version": "1.0.0",
+  "Description": "stardew valley normalizes the diagonal movement vector, this mod undoes that",
+  "UniqueID": "meow.GoFasterDiagonally",
+  "EntryDll": "GoFasterDiagonally.dll",
+  "MinimumApiVersion": "4.0.0",
+  "UpdateKeys": ["Github:meow6969/random-things@GoFasterDiagonally"]
+}
