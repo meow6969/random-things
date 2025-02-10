@@ -1,9 +1,3 @@
-[submodule "c-sharp/osu-database-reader"]
-	path = c-sharp/osu-database-reader
-	url = https://github.com/meow6969/osu-database-reader
-[submodule "c-sharp/CSharpOsuApi"]
-	path = c-sharp/CSharpOsuApi
-	url = https://github.com/meow6969/CSharpOsuApi
 [submodule "c-sharp/OsuDatabaseFileCreatorRoot/CSharpOsuApi"]
 	path = c-sharp/OsuDatabaseFileCreatorRoot/CSharpOsuApi
 	url = https://github.com/meow6969/CSharpOsuApi
