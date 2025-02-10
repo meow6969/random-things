@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OsuDatabaseFileCreator", "OsuDatabaseFileCreator\OsuDatabaseFileCreator.csproj", "{45DFE52F-4F3D-448B-9AB8-212D7D470EE2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpOsuApi", "..\CSharpOsuApi\CSharpOsuApi\CSharpOsuApi.csproj", "{FEC17188-10FB-4AD2-B2D8-1F03C1B3FD98}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "osu-database-reader", "..\osu-database-reader\osu-database-reader\osu-database-reader.csproj", "{172F47ED-71F4-4334-AC1D-3125ADFCFADF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "osu-database-reader.SourceGenerator", "..\osu-database-reader\osu-database-reader.SourceGenerator\osu-database-reader.SourceGenerator.csproj", "{25D2E617-3CEA-4DEB-B945-F1C209BBF3AD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{45DFE52F-4F3D-448B-9AB8-212D7D470EE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45DFE52F-4F3D-448B-9AB8-212D7D470EE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45DFE52F-4F3D-448B-9AB8-212D7D470EE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45DFE52F-4F3D-448B-9AB8-212D7D470EE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEC17188-10FB-4AD2-B2D8-1F03C1B3FD98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEC17188-10FB-4AD2-B2D8-1F03C1B3FD98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEC17188-10FB-4AD2-B2D8-1F03C1B3FD98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEC17188-10FB-4AD2-B2D8-1F03C1B3FD98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{172F47ED-71F4-4334-AC1D-3125ADFCFADF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{172F47ED-71F4-4334-AC1D-3125ADFCFADF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{172F47ED-71F4-4334-AC1D-3125ADFCFADF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{172F47ED-71F4-4334-AC1D-3125ADFCFADF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25D2E617-3CEA-4DEB-B945-F1C209BBF3AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25D2E617-3CEA-4DEB-B945-F1C209BBF3AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25D2E617-3CEA-4DEB-B945-F1C209BBF3AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25D2E617-3CEA-4DEB-B945-F1C209BBF3AD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

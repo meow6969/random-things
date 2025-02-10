@@ -236,12 +236,12 @@ def check_subtitle_ranges_for_show(show_name: str, show_path: str) -> None:
 
 
 if __name__ == "__main__":
-    # verify_episode_numbered_series_links("/mnt/h/plex-folder/da tv/Fist of the North Star (1984)")
+    # verify_episode_numbered_series_links("/mnt/f/meow/toconvert/keroro-gunsou")
     # rename_show_folder_season_folders()
     # test_get_list_of_dict_keys_as_dict_list()
-    # check_for_subtitle_changes_for_show("/mnt/h/plex-folder/da tv/Fist of the North Star (1984)")
-    check_subtitle_ranges_for_show("hokuto-no-ken",
-                                   "/mnt/h/plex-folder/da tv/Fist of the North Star (1984)")
+    check_for_subtitle_changes_for_show("/mnt/f/meow/toconvert/keroro-gunsou")
+    # check_subtitle_ranges_for_show("hokuto-no-ken",
+    #                                "/mnt/h/plex-folder/da tv/Fist of the North Star (1984)")
     # season_number, episode_number, season_number_length, episode_number_length = (
     #     extract_season_and_episode_number_from_video_name("S00001000E00002323.mkv"))
     # print(f"{season_number}, {episode_number}, {season_number_length}, {episode_number_length}")

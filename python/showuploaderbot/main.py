@@ -78,7 +78,9 @@ async def get_channel_of_name(channel_name: str, category_id: int | None = None,
     if category_id == -1:  # we are getting a category channel
         return await client.shows_server.create_category(channel_name)
     if category_id is None:
-        return await client.shows_server.create_text_channel(channel_name)
+        chnl = await client.shows_server.create_text_channel(channel_name)
+        await sort_show_channels()
+        return chnl
     return await client.shows_server.create_text_channel(channel_name, category=client.get_channel(category_id))
 
 

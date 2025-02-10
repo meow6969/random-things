@@ -9,7 +9,7 @@
 # these idk something to do with c-sharp
 *obj/
 *.config/
-*.DotSettings.user
+#*.DotSettings.user
 
 
 
