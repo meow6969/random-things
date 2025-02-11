@@ -34,3 +34,8 @@ python/showuploaderbot/constants.py
 # progress tracker for show uploader bot
 # again, no sensitive info but shouldnt be included
 python/showuploaderbot/progress_tracker.json
+
+python/tsk/config.json
+python/tsk/skip.json
+python/tsk/successful.json
+python/tsk/my_projects

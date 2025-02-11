@@ -82,7 +82,7 @@ class TvShow:
 
     async def upload_to_discord(self, upload_channel: discord.TextChannel):
         first_ep = True
-        # not doing checking on episodes since most of the shows are missing them any way
+        # not doing checking on episodes since this should be done properly by the video converter
         for season_folder_name in natsort.natsorted(os.listdir(self.show_path)):
             season_folder_path = os.path.join(self.show_path, season_folder_name)
             if os.path.isfile(season_folder_path):
