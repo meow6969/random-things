@@ -7,9 +7,6 @@ import json
 import pathlib
 
 
-os.chdir("tsk")
-
-
 def get_project_info(page_content):
     page = page_content.decode()
     for line in page.splitlines():
