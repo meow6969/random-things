@@ -39,3 +39,6 @@ python/tsk/config.json
 python/tsk/skip.json
 python/tsk/successful.json
 python/tsk/my_projects
+
+python/adventofcode/*/data.txt
+python/adventofcode/2021/output.txt
