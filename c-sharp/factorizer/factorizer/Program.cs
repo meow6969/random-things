@@ -1,5 +1,6 @@
 ﻿// ReSharper disable UnusedMember.Local
 
+using System.Numerics;
 using factorizer.Latex;
 using factorizer.Models;
 using static factorizer.UtilityFunctions;
@@ -8,6 +9,8 @@ namespace factorizer;
 
 internal static class Program
 {
+    private const double IsNumberIntegerTolerance = .0001;
+    
     public class PrimeFactors
     {
         private int _generatedToNum = 2;
@@ -18,11 +21,11 @@ internal static class Program
             
         }
 
-        public void OutputPrimeNumbersList()
+        public static void OutputPrimeNumbersList()
         {
-            Console.Write($"Prime numbers up to {_generatedToNum}: ");
+            Console.Write($"Prime numbers up to {_instance._generatedToNum}: ");
             string txt = "";
-            foreach (int num in _primeNumbers)
+            foreach (int num in _instance._primeNumbers)
             {
                 txt += num + ", ";
             }
@@ -44,19 +47,27 @@ internal static class Program
             _instance._generatedToNum = int.Max(limit, _instance._generatedToNum);
             return _instance._primeNumbers;
         }
+
+        public static PrimeFactors GetInstance()
+        {
+            return _instance;
+        }
     }
     
     private static void Main(string[] args)
     {
-        OldGetFactorsProgram(args);
-        
-        // Dictionary<char, int> meow = new Dictionary<char, int>();
+        // PrimeFactors.GetPrimeNumbers(1000);
+        // PrimeFactors.OutputPrimeNumbersList();
+        if (args[0] == "-q") DoQuadraticFormula(int.Parse(args[1]), int.Parse(args[2]), int.Parse(args[3]));
+        else OldGetFactorsProgram(args);
+
+        // Dictionary<char, int> meow = new Dictionary<char, int>();\frac{{-4 + \sqrt{10}i}{3}
         // meow['x'] = 1;
         // SolveExpressionAsX(LatexToMath.LatexExpressionToMathExpression("70x+80-360"), meow);
         // SolveExpressionForY(LatexToMath.LatexExpressionToMathExpression("17x+8"));
         // Console.WriteLine(Math.Pow(1D/144, 1.0D / 2D));
         // Console.WriteLine(1D/12D);
-        // DoQuadraticFormula(1, -9, -10);
+        // DoQuadraticFormula(9, 24, 26);
         // int lcm = GetLeastCommonMultiple(9, 8);
         // Console.WriteLine(lcm);
         // Console.WriteLine($"{lcm} / 5 = {lcm / 5}, {lcm} / 16 = {lcm / 16}");
@@ -69,15 +80,149 @@ internal static class Program
     // (4)
     private static void DoQuadraticFormula(int a, int b, int c)
     {
+        Console.WriteLine($"a={a}, b={b}, c={c}");
+        
         double sum1 = -b;
         double sum2 = -b;
-        double theSqrt = Math.Sqrt(Math.Pow(b, 2) - 4 * a * c);
-        sum1 += theSqrt;
-        sum2 -= theSqrt;
-        sum1 /= 2 * a;
-        sum2 /= 2 * a;
+        int denominator = 2 * a;
+        int gcf;
+        string imaginary = "";
+        double underTheSqrt = Math.Pow(b, 2) - 4 * a * c;
+        // Console.WriteLine(underTheSqrt);
+        if (underTheSqrt < 0)
+        {
+            imaginary = "i";
+            underTheSqrt *= -1;
+        }
+        Console.WriteLine(underTheSqrt);
+        Console.WriteLine(SimplifyRadical((int)underTheSqrt));
+        double theSqrt = Math.Sqrt(underTheSqrt);
+        Console.WriteLine(denominator);
+        Console.WriteLine(imaginary);
+        // Console.WriteLine(theSqrt);
+        if (!IsNumberInteger(theSqrt))
+        {
+            // the thingy returned as a non perfect square root
+            (int coefficient, int underTheRoot) = SimplifyRadical((int)underTheSqrt);
+            
+            gcf = GetGreatestCommonFactor(coefficient, denominator, -b);
+            coefficient /= gcf;
+            denominator /= gcf;
+            b /= gcf;
+            string bString = "+";
+            string coefficientString = "";
+            string preDenominatorString = "";
+            string denominatorString = "";
+            if (coefficient != 1) coefficientString = $"{coefficient}";
+            else bString += " ";
+            if (denominator != 1)
+            {
+                preDenominatorString = "\\frac{";
+                denominatorString = $"}}{{{denominator}}}";
+            }
+            if (b != 1) bString = $"{-b} + ";
+            string exactEquations = "Quadratic formula result: ";
+            exactEquations += $"{preDenominatorString}{bString}{coefficientString}\\sqrt{{{underTheRoot}}}{imaginary}" +
+                              $"{denominatorString}, ";
+            
+            exactEquations += $"{preDenominatorString}{bString.Replace('+', '-')}{coefficientString}" +
+                              $"\\sqrt{{{underTheRoot}}}{imaginary}{denominatorString}";
+            
+            Console.WriteLine(exactEquations);
+            if (imaginary == "i") return;
+            Console.WriteLine($"Decimal values:           " +
+                              $"{(-b + coefficient * Math.Sqrt(underTheRoot)) / denominator}, " +
+                              $"{(-b - coefficient * Math.Sqrt(underTheRoot)) / denominator}");
+            return;
+        }
+
+        string displayMessage = "Quadratic formula result: ";
+        if (imaginary != "i")
+        {
+            sum1 += theSqrt;
+            sum2 -= theSqrt;
+            double postDivide1 = sum1 / (2 * a);
+            double postDivide2 = sum2 / (2 * a);
         
-        Console.WriteLine($"Quadratic formula result: {sum1}, {sum2}");
+            if (!IsNumberInteger(postDivide1))
+            {
+                double numerator = sum1;
+                Console.WriteLine(numerator);
+                Console.WriteLine(denominator);
+                gcf = GetGreatestCommonFactor((int)numerator, denominator);
+            
+                displayMessage += $"{numerator / gcf} / {denominator / gcf}, ";
+            }
+            else displayMessage += $"{postDivide1}, ";
+
+            if (!IsNumberInteger(postDivide2))
+            {
+                double numerator = sum2;
+                gcf = GetGreatestCommonFactor((int)numerator, denominator);
+            
+                displayMessage += $"{numerator / gcf} / {denominator / gcf}";
+            }
+            else displayMessage += $"{postDivide2}";
+            Console.WriteLine(displayMessage);
+            return;
+        }
+        
+        gcf = GetGreatestCommonFactor(denominator, (int)theSqrt);
+        int rightNumerator = (int)theSqrt / gcf;
+        int rightDenominator = denominator / gcf;
+        gcf = GetGreatestCommonFactor(denominator, (int)sum1);
+        int leftNumerator = (int)sum1;
+        leftNumerator /= gcf;
+        int leftDenominator = denominator / gcf;
+        // Console.WriteLine(sum1);
+        string leftSide;
+        if (rightDenominator != 1)
+        {
+            int lcm = GetLeastCommonMultiple(leftNumerator, leftDenominator);
+            
+            leftSide = $"\\frac{{{leftNumerator / (lcm / leftNumerator)}}}" +
+                       $"{{{leftDenominator / (lcm / leftDenominator)}}}";
+        }
+        else
+        {
+            if (leftDenominator != 1)
+            {
+                leftSide = $"\\frac{{{leftNumerator}}}{{{leftDenominator}}}";
+            }
+            else
+            {
+                leftSide = $"{leftNumerator}";
+            }
+        }
+
+        string rightSide;
+
+        if (rightNumerator != 1)
+        {
+            rightSide = $"{rightNumerator}{imaginary}";
+        }
+        else
+        {
+            rightSide = imaginary;
+        }
+        Console.WriteLine($"{displayMessage}{leftSide} + {rightSide}, {leftSide} - {rightSide}");
+
+        // Console.WriteLine($"Quadratic formula result: {sum1}, {sum2}");
+    }
+
+    private static bool IsNumberInteger(double num)
+    {
+        return Math.Abs(num - Math.Floor(num)) < IsNumberIntegerTolerance;
+    }
+    
+    private static bool IsNumberInteger(float num)
+    {
+        return IsNumberInteger((double)num);
+    }
+
+    private static bool IsNumberInteger(int num)
+    {
+        return true;
     }
     
     private static void SolveExpressionAsX(MathExpression expression, Dictionary<char, int> variablesAs)
@@ -365,6 +510,47 @@ internal static class Program
         }
 
         return commonFactors.ToArray();
+    }
+
+    private static (int, int) SimplifyRadical(int theSquareRooted)
+    {
+        NumberFactors theFactors = GetFactors(theSquareRooted);
+        int greatestPerfectSquareFactor = 1;
+        foreach (int factor in theFactors.Factors)
+        {
+            if (IsNumberInteger(Math.Sqrt(factor)) && factor > greatestPerfectSquareFactor)
+            {
+                greatestPerfectSquareFactor = factor;
+            }
+        }
+
+        if (greatestPerfectSquareFactor == 1) return (1, theSquareRooted);
+        return ((int)Math.Sqrt(greatestPerfectSquareFactor), theSquareRooted / greatestPerfectSquareFactor);
+    }
+
+    private static int GetGreatestCommonFactor(NumberFactors[] numberFactors)
+    {
+        int gcf = 1;
+        
+        if (numberFactors.Length is 0 or 1) return 1;
+        
+        foreach (int factor in GetCommonFactors(numberFactors))
+        {
+            if (factor > gcf) gcf = factor;
+        }
+
+        return gcf;
+    }
+    
+    private static int GetGreatestCommonFactor(params int[] numbers)
+    {
+        List<NumberFactors> theFactors = [];
+        foreach (int num in numbers)
+        {
+            theFactors.Add(GetFactors(num));
+        }
+
+        return GetGreatestCommonFactor(theFactors.ToArray());
     }
     
     private static int? GetNumberFromString(string numString)
