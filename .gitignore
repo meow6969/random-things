@@ -9,7 +9,7 @@
 # these idk something to do with c-sharp
 *obj/
 *.config/
-#*.DotSettings.user
+*.DotSettings.user
 
 
 
@@ -34,6 +34,8 @@ python/showuploaderbot/constants.py
 # progress tracker for show uploader bot
 # again, no sensitive info but shouldnt be included
 python/showuploaderbot/progress_tracker.json
+
+python/showuploaderbot/showsendingserver/users.json
 
 python/tsk/config.json
 python/tsk/skip.json

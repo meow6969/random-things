@@ -166,7 +166,6 @@ public class LatexToMath
 
         foreach (char theChar in latexParentheses)
         {
-            // Console.WriteLine(theChar);
             if (theChar == '\\')
             {
                 searchingFor = SearchingFor.Parenthesis;
@@ -176,19 +175,13 @@ public class LatexToMath
 
             if (searchingFor > 0) // if its trying to search for something (nothing=0)
             {
-                // Console.WriteLine($"theChar : {theChar}");
-                // Console.WriteLine($"searchingFor: {searchingFor}");
-                // Console.WriteLine($"searchingForToken: {searchingForToken}\n");
-                
                 searchingForToken += theChar;
                 if (startParenthesis.StartsWith(searchingForToken))
                 {
                     if (searchingForToken == startParenthesis)
                     {
-                        // Console.WriteLine($"{searchingForToken} = {startParenthesis}");
                         searchingFor = SearchingFor.Nothing;
                         tokens.Add(token);
-                        // Console.WriteLine(token);
                         token = "";
                         searchingForToken = "";
                     }

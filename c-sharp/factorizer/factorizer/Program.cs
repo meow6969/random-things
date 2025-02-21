@@ -56,22 +56,11 @@ internal static class Program
     
     private static void Main(string[] args)
     {
-        // PrimeFactors.GetPrimeNumbers(1000);
-        // PrimeFactors.OutputPrimeNumbersList();
+        // DoQuadraticFormula(-25, 150, 200);
+        
         if (args[0] == "-q") DoQuadraticFormula(int.Parse(args[1]), int.Parse(args[2]), int.Parse(args[3]));
         else OldGetFactorsProgram(args);
 
-        // Dictionary<char, int> meow = new Dictionary<char, int>();\frac{{-4 + \sqrt{10}i}{3}
-        // meow['x'] = 1;
-        // SolveExpressionAsX(LatexToMath.LatexExpressionToMathExpression("70x+80-360"), meow);
-        // SolveExpressionForY(LatexToMath.LatexExpressionToMathExpression("17x+8"));
-        // Console.WriteLine(Math.Pow(1D/144, 1.0D / 2D));
-        // Console.WriteLine(1D/12D);
-        // DoQuadraticFormula(9, 24, 26);
-        // int lcm = GetLeastCommonMultiple(9, 8);
-        // Console.WriteLine(lcm);
-        // Console.WriteLine($"{lcm} / 5 = {lcm / 5}, {lcm} / 16 = {lcm / 16}");
-        // OutputCommonFactors([GetFactors(11),  GetFactors(-110)]);
     }
     //      4x    -1
     //   4x 16x^2 -4x
@@ -94,11 +83,11 @@ internal static class Program
             imaginary = "i";
             underTheSqrt *= -1;
         }
-        Console.WriteLine(underTheSqrt);
-        Console.WriteLine(SimplifyRadical((int)underTheSqrt));
+        // Console.WriteLine(underTheSqrt);
+        // Console.WriteLine(SimplifyRadical((int)underTheSqrt));
         double theSqrt = Math.Sqrt(underTheSqrt);
-        Console.WriteLine(denominator);
-        Console.WriteLine(imaginary);
+        // Console.WriteLine(denominator);
+        // Console.WriteLine(imaginary);
         // Console.WriteLine(theSqrt);
         if (!IsNumberInteger(theSqrt))
         {
@@ -525,6 +514,7 @@ internal static class Program
         }
 
         if (greatestPerfectSquareFactor == 1) return (1, theSquareRooted);
+        //          (coefficient, undertheroot)
         return ((int)Math.Sqrt(greatestPerfectSquareFactor), theSquareRooted / greatestPerfectSquareFactor);
     }
 

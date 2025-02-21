@@ -66,6 +66,7 @@ async def sync_all_uploads(shows_folder: str) -> None:
         await show.upload_to_discord(upload_channel)
     save_progress_tracker(client)
     print(f"{CCs.OKGREEN}done uploading all shows!{CCs.ENDC}")
+    await client.close()
 
 
 async def get_channel_of_name(channel_name: str, category_id: int | None = None,
@@ -259,7 +260,7 @@ async def about(ctx):
                    "check if out if u want!")
 
 
-if __name__ == "__main__":
+def start_bot():
     ensure_config_json_exists()
     with open("config.json") as meow:
         the_config = json.load(meow)
@@ -269,3 +270,7 @@ if __name__ == "__main__":
     convert_all_files(files_to_convert_dir, output_files_dir, files_converted_dir)
 
     client.run(token)
+
+
+if __name__ == "__main__":
+    start_bot()
