@@ -309,3 +309,11 @@ def hash_dict_or_list(the_thing: dict | list) -> int:
     the_hash = hash(the_tuple)
     # print(f"{the_hash}: {the_tuple}")
     return the_hash
+
+
+def season_number_to_folder(season_number: int) -> str:
+    return f"s{season_number:02}"
+
+
+def get_episode_file_name(season_number: int, episode_number: int, og_name: str = ".mp4") -> str:
+    return f"S{season_number:02}E{episode_number:02}_{og_name}"

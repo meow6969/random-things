@@ -199,18 +199,25 @@ class Plugin(BasePlugin):
             for i in retrieved:
                 data[i] = 0
             users = 0
+            leecher_upload_amt = 0
             for column in response:
                 users += 1
+                if column[3] == True:
+                    leecher_upload_amt += column[2]
                 for i, row in enumerate(column):
                     data[retrieved[i]] += row
 
+
             human_readable_size = self.database.convert_size(data[retrieved[2]])
+            human_readable_leecher_size = self.database.convert_size(leecher_upload_amt)
 
             self.send_public(room, f"total files uploaded: {data[retrieved[0]]}, "
                                    f"total files completed: {data[retrieved[1]]}, "
                                    f"total amount uploaded: {human_readable_size}, "
                                    f"total users: {users}, "
-                                   f"total leechers: {data[retrieved[3]]}")
+                                   f"total leechers: {data[retrieved[3]]}, "
+                                   f"leecher percentage: {int(int(data[retrieved[3]]) / users * 100)}%, "
+                                   f"amount uploaded to leechers: {human_readable_leecher_size}")
             # print(response)
         # if "!filestats" in line.lower().strip():
         #     response = self.database.cur.execute(f"""

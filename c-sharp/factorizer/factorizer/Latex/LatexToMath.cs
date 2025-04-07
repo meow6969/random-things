@@ -144,14 +144,6 @@ public class LatexToMath
         return mathExpression;
     }
 
-    enum SearchingFor
-    {
-        Nothing,
-        Parenthesis,
-        StartParenthesis,
-        EndParenthesis
-    }
-
     // like: \left(6x+9\right)\left(9y+7\right)
     // TODO: support the coefficient thing like: 6x+9(5x+5) -> 6x, 9(5x+5)
     // TODO:                         rn it goes: 6x+9(5x+5) -> (6x+9)(5x+5), which is wrong

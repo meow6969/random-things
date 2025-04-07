@@ -1,4 +1,6 @@
 import os
+import shutil
+import pathlib
 
 
 # seperated into its own file to prevent circular import errors
@@ -16,5 +18,6 @@ class CCs:  # this is just color codes so that printed lines in the console look
 
 # doesnt have to be here but whatever imports would look ugly in showuploaderbotfuncs.py otherwise
 def ensure_constants_py_exists() -> None:
-    if not os.path.exists("constants.py"):
-        shutil.copy("constants.example.py", "constants.py")
+    fd = pathlib.Path(__file__).parent.resolve()
+    if not fd.joinpath("constants.py").exists():
+        shutil.copy(fd.joinpath("constants.example.py"), fd.joinpath("constants.py"))

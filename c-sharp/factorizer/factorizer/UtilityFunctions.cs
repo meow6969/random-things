@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using factorizer;
 using factorizer.Models;
 // ReSharper disable MemberCanBePrivate.Global
@@ -8,6 +9,7 @@ namespace factorizer;
 public abstract class UtilityFunctions
 {
     private const int IndentAmount = 4;
+    private const double IsNumberIntegerTolerance = .0001;
     
     public static string RemoveLastFromString(string text, int lastToRemove=1)
     {
@@ -21,6 +23,31 @@ public abstract class UtilityFunctions
         if (newLine) Console.Write('\n');
         for (int i = 0; i < indent * IndentAmount; i++) Console.Write(' ');
         Console.WriteLine(text);
+    }
+    
+    public static bool NumberEqualsInt(double num, int theInt)
+    {
+        if (Math.Abs(num - theInt) < IsNumberIntegerTolerance)
+        {
+            return true;
+        }
+
+        return false;
+    }
+    
+    public static bool IsNumberInteger(double num)
+    {
+        return Math.Abs(num - Math.Floor(num)) < IsNumberIntegerTolerance;
+    }
+    
+    public static bool IsNumberInteger(float num)
+    {
+        return IsNumberInteger((double)num);
+    }
+
+    public static bool IsNumberInteger(int num)
+    {
+        return true;
     }
     
     // TODO: update this
@@ -59,6 +86,40 @@ public abstract class UtilityFunctions
         factors.Sort();
 
         return new NumberFactors(factorPairs, factors);
+    }
+    
+    public static DoubleNumberFactors GetFactors(double num)
+    {
+        int precisionLimit = 5;
+        for (int i = 0; i < precisionLimit + 1; i++)
+        {
+            int theMult = (int)Math.Pow(10, i);
+            double multedNum = num * theMult;
+            if (IsNumberInteger(multedNum))
+            {
+                NumberFactors theFactors = GetFactors((int)multedNum);
+                List<List<double>> newPairs = [];
+                List<double> newFactors = [];
+                foreach (List<int> pair in theFactors.FactorPairs)
+                {
+                    // newPairs.Add([(double)pair[0] / theMult, (double)pair[1] / theMult]);
+                    double first = pair[0];
+                    double last = (double)pair[1] / theMult;
+                    newPairs.Add([first, last]);
+                    if (!newFactors.Contains(first)) newFactors.Add(first);
+                    if (!newFactors.Contains(last)) newFactors.Add(last);
+                }
+
+                // foreach (int factor in theFactors.Factors)
+                // {
+                //     newFactors.Add((double)factor / theMult);
+                // }
+                return new DoubleNumberFactors(newPairs, newFactors);    
+            }
+        }
+        
+
+        return new DoubleNumberFactors([], []);
     }
     
     public class NumberFactors(List<List<int>> factorPairs, List<int> factors)
@@ -103,6 +164,33 @@ public abstract class UtilityFunctions
                 if (!IsPrime(factor)) continue;
                 txt += $"{factor}, ";
             }
+            Console.WriteLine(txt[..^2]);
+        }
+    }
+    
+    public class DoubleNumberFactors(List<List<double>> factorPairs, List<double> factors)
+    {
+        public readonly List<List<double>> FactorPairs = factorPairs;
+        public readonly List<double> Factors = factors;
+
+        public void PrintFactors(bool duplicates = false)
+        {
+            string txt = "factors: ";
+            if (duplicates)
+            {
+                foreach (List<double> factorPair in FactorPairs)
+                {
+                    txt += $"({factorPair[0]}, {factorPair[1]}), ";
+                }
+            }
+            else
+            {
+                foreach (double factor in Factors)
+                {
+                    txt += $"{factor}, ";
+                }
+            }
+        
             Console.WriteLine(txt[..^2]);
         }
     }
@@ -157,5 +245,24 @@ public abstract class UtilityFunctions
         {
             Console.WriteLine($"index={i}: {array[i]}");
         }
+    }
+
+    public static Dictionary<T2, T1[]> ReverseDictionaryWithListValues<T1, T2>(Dictionary<T1, T2> theDict)
+        where T1 : notnull
+        where T2 : notnull
+    {
+        Dictionary<T2, List<T1>> newDict = [];
+        foreach (KeyValuePair<T1, T2> pair in theDict)
+        {
+            if (newDict.Keys.Contains(pair.Value))
+            {
+                newDict[pair.Value].Add(pair.Key);
+                continue;
+            }
+
+            newDict[pair.Value] = [pair.Key];
+        }
+
+        return newDict.ToDictionary(x => x.Key, x => x.Value.ToArray());
     }
 }

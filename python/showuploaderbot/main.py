@@ -2,6 +2,8 @@ import json
 import math
 import os
 import typing
+import sys
+print(sys.version)
 
 import natsort
 
@@ -12,12 +14,17 @@ from convertfilestodiscorduploadable import convert_all_files, extract_video_con
 from ihatecircularimport import CCs
 from showuploaderbotclasses import TvShow
 from showuploaderbotfuncs import ensure_config_json_exists, is_file_video, save_progress_tracker, wait_between_uploads
+from showsendingserver.server import ShowSendingServer
+
+
+
 
 
 def setup_bot_client() -> commands.Bot:
     print(f"{CCs.OKCYAN}setting up commands.Bot object as client{CCs.ENDC}")
     ensure_config_json_exists()
     _client = commands.Bot(command_prefix="showbot")
+    _client.sync_lock = False
 
     with open("config.json", "r") as f:
         config = json.load(f)
@@ -25,6 +32,8 @@ def setup_bot_client() -> commands.Bot:
         _client.shows_folder = config["shows-folder"]
         _client.shows_server_id = config["shows-server-id"]
         _client.seconds_to_wait_between_uploads = config["minutes-to-wait-between-uploads"] * 60
+        _client.video_converter_settings = config["video-converter-settings"]
+        _client.filter_complex_builder_path = os.path.realpath("./filter_complex_builder.json")
 
     if not os.path.exists(os.path.join(os.getcwd(), "progress_tracker.json")):
         with open("progress_tracker.json", "w+") as f:
@@ -35,38 +44,48 @@ def setup_bot_client() -> commands.Bot:
     return _client
 
 
-async def sync_all_uploads(shows_folder: str) -> None:
-    for disk_object in natsort.natsorted(os.listdir(shows_folder)):
-        disk_object_path = os.path.join(shows_folder, disk_object)
-        if not os.path.isdir(disk_object_path):
-            continue
-        if os.path.basename(disk_object_path) == "MOVIES":
-            await upload_movies_to_discord(disk_object_path)
-            continue
-        show = TvShow(disk_object_path, client)
-        if show.show_name.startswith("SKIP"):
-            print(f"{CCs.WARNING}skipped {show.show_name[5:]}{CCs.ENDC}")
-            continue
+async def sync_all_uploads(shows_folder: str) -> bool:
+    if client.sync_lock:
+        return False
+    client.sync_lock = True
+    try:
+        for disk_object in natsort.natsorted(os.listdir(shows_folder)):
+            disk_object_path = os.path.join(shows_folder, disk_object)
+            if not os.path.isdir(disk_object_path):
+                continue
+            if os.path.basename(disk_object_path) == "MOVIES":
+                await upload_movies_to_discord(disk_object_path)
+                continue
+            show = TvShow(disk_object_path, client)
+            if show.show_name.startswith("SKIP"):
+                print(f"{CCs.WARNING}skipped {show.show_name[5:]}{CCs.ENDC}")
+                continue
 
-        # if show_name != "nichijou":
-        #     print(f"{CCs.OKCYAN}skipping show {show_name}{CCs.ENDC}")
-        #     continue
+            # if show_name != "nichijou":
+            #     print(f"{CCs.OKCYAN}skipping show {show_name}{CCs.ENDC}")
+            #     continue
 
-        # check that the season names are correctly named
+            # check that the season names are correctly named
 
-        if not show.verify_show_folder_structure():  # if there was an error in file structure
-            continue  # go to the next show
+            if not show.verify_show_folder_structure():  # if there was an error in file structure
+                continue  # go to the next show
 
-        category = await get_category_for_show(show.show_name)
+            category = await get_category_for_show(show.show_name)
 
-        upload_channel = await get_channel_of_name(show.show_name, category.id)
+            upload_channel = await get_channel_of_name(show.show_name, category.id)
 
-        # now we can start uploading episodes
-        # await upload_show_to_discord(show, upload_channel)
-        await show.upload_to_discord(upload_channel)
-    save_progress_tracker(client)
-    print(f"{CCs.OKGREEN}done uploading all shows!{CCs.ENDC}")
-    await client.close()
+            # now we can start uploading episodes
+            # await upload_show_to_discord(show, upload_channel)
+            await show.upload_to_discord(upload_channel)
+        save_progress_tracker(client)
+        print(f"{CCs.OKGREEN}done uploading all shows!{CCs.ENDC}")
+        client.sync_lock = False
+        return True
+    except Exception as e:
+        print(f"{CCs.FAIL}error in show sync: {e}{CCs.ENDC}")
+        client.sync_lock = False
+        return False
+    # await client.close()
 
 
 async def get_channel_of_name(channel_name: str, category_id: int | None = None,
@@ -76,9 +95,9 @@ async def get_channel_of_name(channel_name: str, category_id: int | None = None,
     for channel in client.shows_server.channels:
         if channel.name == channel_name:
             return channel
-    if category_id == -1:  # we are getting a category channel
+    if category_id == -1:
         return await client.shows_server.create_category(channel_name)
-    if category_id is None:
+    if category_id is None:  # we are getting a category channel
         chnl = await client.shows_server.create_text_channel(channel_name)
         await sort_show_channels()
         return chnl
@@ -247,6 +266,9 @@ async def on_ready():
         client.owners.append(client.user.id)
 
     client.shows_server = client.get_guild(client.shows_server_id)
+    print(f"{CCs.OKGREEN}starting up the upload server!{CCs.ENDC}")
+    client.show_sending_server = ShowSendingServer(client)
+    await client.show_sending_server.start()
 
     print(f"{CCs.OKGREEN}show uploader bot ready!{CCs.ENDC}")
     await sort_show_channels()
@@ -258,6 +280,18 @@ async def about(ctx):
     await ctx.send("hello! i am show uploader bot! i upload ur fav tv shows!!\n"
                    "source code here: https://github.com/meow6969/random-things/tree/main/python/showuploaderbot\n"
                    "check if out if u want!")
+
+
+@client.command()
+async def sync_shows(ctx):
+    pass
+    await ctx.send("syncing shows...")
+    r = await sync_all_uploads(client.shows_folder)
+    if r:
+        return await ctx.send("done syncing shows!")
+    elif client.sync_lock:
+        return await ctx.send("sync is locked!")
+    return await ctx.send("error syncing shows!")
 
 
 def start_bot():

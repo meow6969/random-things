@@ -1,0 +1,6 @@
+{
+  "token": "your token",
+  "files-to-upload-dir": "/path/where/the/shows/you/want/to/upload/go",
+  "uploaded-files-dir": "/path/where/uploaded/files/go",
+  "server-ip": "ip:port"
+}

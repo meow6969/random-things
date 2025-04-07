@@ -36,6 +36,7 @@ python/showuploaderbot/constants.py
 python/showuploaderbot/progress_tracker.json
 
 python/showuploaderbot/showsendingserver/users.json
+python/showuploaderbot/showsendingserver/clientconfig.json
 
 python/tsk/config.json
 python/tsk/skip.json
