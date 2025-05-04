@@ -133,21 +133,28 @@ def extract_ep_compare_num_from_video_name(video_name: str) -> int:
     return int(f"{s_num}{ep_num:03d}")
 
 
-def get_all_subtitles_info_from_video(video_path: str) -> list[dict]:
-    all_subtitles_info = []
+def get_all_codec_type_info_from_video(video_path: str, codec_type: str) -> list[dict]:
+    all_codecs_info = []
     result = subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "stream", "-of", "json", video_path],
         stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
     # print(result.stdout)
     stream_entries: dict = json.loads(result.stdout)
     if "streams" not in stream_entries.keys():
-        raise Exception(f"could not get subtitle data from video: {video_path}")
+        raise Exception(f"could not get codec_type={codec_type} data from video: {video_path}")
     for stream_entry in stream_entries["streams"]:
-        current_subtitle_index = 0
         # im pretty sure the output of this is always in order
-        if stream_entry["codec_type"] == "subtitle":
-            all_subtitles_info.append(stream_entry)
-    return all_subtitles_info
+        if stream_entry["codec_type"] == codec_type:
+            all_codecs_info.append(stream_entry)
+    return all_codecs_info
+
+
+def get_all_subtitles_info_from_video(video_path: str) -> list[dict]:
+    return get_all_codec_type_info_from_video(video_path, "subtitle")
+
+
+def get_all_audios_info_from_video(video_path: str) -> list[dict]:
+    return get_all_codec_type_info_from_video(video_path, "audio")
 
 
 def get_subtitle_info_from_video(video_path: str, subtitle_index=0) -> dict:

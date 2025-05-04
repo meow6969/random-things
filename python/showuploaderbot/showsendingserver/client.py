@@ -37,13 +37,12 @@ def upload_movie(config: Config, movie: pathlib.Path):
         print(f"error in initializing uploading movie {movie}!")
         print(r.content.decode())
         exit(r.status_code)
-    g = requests.post(
-        f"http://{config.server_ip}/authed/upload/{r.json()['id']}",
-        headers={"Authorization": f"Token {config.token}", "Content-Type": "video/"},
-        data=open(movie, "rb")
-        # json={"movie": filename},
-        # files={"file": open(movie, "rb")}
-    )
+    with open(movie, "rb") as m_f:
+        g = requests.post(
+            f"http://{config.server_ip}/authed/upload/{r.json()['id']}",
+            headers={"Authorization": f"Token {config.token}", "Content-Type": "video/"},
+            data=m_f.read()
+        )
     if not g.ok:
         print(f"error in uploading movie {movie}!")
         print(g.content.decode())
@@ -64,13 +63,12 @@ def upload_episode(config: Config, episode: pathlib.Path, show: pathlib.Path, se
         print(f"error in initializing uploading episode {episode}!")
         print(r.content.decode())
         exit(r.status_code)
-    g = requests.post(
-        f"http://{config.server_ip}/authed/upload/{r.json()['id']}",
-        headers={"Authorization": f"Token {config.token}", "Content-Type": "video/"},
-        data=open(episode, "rb")
-        # json={"movie": filename},
-        # files={"file": open(movie, "rb")}
-    )
+    with open(episode, "rb") as e_f:
+        g = requests.post(
+            f"http://{config.server_ip}/authed/upload/{r.json()['id']}",
+            headers={"Authorization": f"Token {config.token}", "Content-Type": "video/"},
+            data=e_f.read()
+        )
     if not g.ok:
         print(f"error in uploading episode {episode}!")
         print(g.content.decode())

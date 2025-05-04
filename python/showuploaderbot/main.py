@@ -14,10 +14,6 @@ from convertfilestodiscorduploadable import convert_all_files, extract_video_con
 from ihatecircularimport import CCs
 from showuploaderbotclasses import TvShow
 from showuploaderbotfuncs import ensure_config_json_exists, is_file_video, save_progress_tracker, wait_between_uploads
-from showsendingserver.server import ShowSendingServer
-
-
-
 
 
 def setup_bot_client() -> commands.Bot:
@@ -267,11 +263,11 @@ async def on_ready():
 
     client.shows_server = client.get_guild(client.shows_server_id)
     print(f"{CCs.OKGREEN}starting up the upload server!{CCs.ENDC}")
-    client.show_sending_server = ShowSendingServer(client)
-    await client.show_sending_server.start()
+    # client.show_sending_server = ShowSendingServer(client)
+    # await client.show_sending_server.start()
 
     print(f"{CCs.OKGREEN}show uploader bot ready!{CCs.ENDC}")
-    await sort_show_channels()
+    # await sort_show_channels()
     await sync_all_uploads(client.shows_folder)
 
 

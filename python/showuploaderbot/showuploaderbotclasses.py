@@ -256,6 +256,7 @@ class ShowFilterComplex:
     audio_stream_id: int = 0
     x_resolution: int = VIDEO_RESOLUTION[0]
     y_resolution: int = VIDEO_RESOLUTION[1]
+    framerate: int = VIDEO_FRAMERATE
 
     def __init__(self, show_complex_dict: dict, show_name: str):
         self.show_complex_dict = show_complex_dict
@@ -278,6 +279,8 @@ class ShowFilterComplex:
             self.x_resolution = filter_complex_dict["x-resolution"]
         if "y-resolution" in filter_complex_dict.keys():
             self.y_resolution = filter_complex_dict["y-resolution"]
+        if "framerate" in filter_complex_dict.keys():
+            self.framerate = filter_complex_dict["framerate"]
 
 
 class NoFilterComplex(ShowFilterComplex):
@@ -388,7 +391,7 @@ class VideoObject:
     path: str
     name: str
     expected_size: float
-    framerate: int
+    # framerate: int
     # resolution: tuple[int, int]
     filter_complex: ShowFilterComplex
 
@@ -398,7 +401,7 @@ class VideoObject:
         self.path = video_path
         self.name = pathlib.Path(video_path).name
         self.expected_size = self.bitrate * self.t + self.audio_bitrate * self.t
-        self.framerate = VIDEO_FRAMERATE
+        # self.framerate = VIDEO_FRAMERATE
         if filter_complex is None:
             filter_complex = NoFilterComplex()
         self.filter_complex = filter_complex
@@ -409,7 +412,7 @@ class VideoObject:
         pathlib.Path(destination_converted).parent.mkdir(parents=True, exist_ok=True)
         destination_file = os.path.join(os.path.realpath(self.path), os.path.realpath(destination_folder))
         ffmpeg_args = self.get_ffmpeg_arguments(destination_file)
-        print(f"{CCs.OKCYAN}\n{self.name}, framerate={self.framerate}, b:v={self.bitrate}k, b:a={self.audio_bitrate}k, "
+        print(f"{CCs.OKCYAN}\n{self.name}, framerate={self.filter_complex.framerate}, b:v={self.bitrate}k, b:a={self.audio_bitrate}k, "
               f"resolution=({self.filter_complex.x_resolution}, {self.filter_complex.y_resolution}), "
               f"exp_size={self.expected_size / 8 / 1000}MB{CCs.ENDC}")
         print(f"{CCs.OKCYAN}converting: {self.path} -> {change_extension_to_mp4(destination_folder)}{CCs.ENDC}")
@@ -442,7 +445,7 @@ class VideoObject:
                 case "AUDIO_BITRATE":
                     new_args.append(str(int(self.audio_bitrate)) + "k")
                 case "FRAMERATE":
-                    new_args.append(str(self.framerate))
+                    new_args.append(str(self.filter_complex.framerate))
                 # case "scale=RESOLUTION":
                 #     new_args.append(f"scale={self.resolution}")
                 case "OUTPUT_FILE":

@@ -145,6 +145,7 @@ async def create_movie_upload(request: web.Request):
 @routes.post("/authed/upload/{id}")
 async def upload_file(request: web.Request):
     up = None
+    # print(request.can_read_body())
     try:
         up_id = request.match_info["id"]
         up = await constants.SHOW_SENDING_SERVER.get_upload_from_id(up_id)
