@@ -9,6 +9,7 @@ if exist venv\ (
     echo making python venv
     python -m venv venv
     venv\Scripts\activate
+    echo installing pip modules
     pip install -r REQUIREMENTS.txt
 )
 
