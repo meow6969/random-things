@@ -1,7 +1,8 @@
 @echo off
 
 echo running %0...
-git pull
+:: echo updating with git...
+:: git pull
 
 if exist venv\ (
     echo venv already exists
