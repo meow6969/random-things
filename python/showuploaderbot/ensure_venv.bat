@@ -1,3 +1,5 @@
+@echo off
+
 echo running %0...
 git pull
 
