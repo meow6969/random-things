@@ -13,7 +13,8 @@ from showuploaderbotfuncs import (change_extension_to_mp4, convert_str_or_bytes_
                                   extract_season_number_from_folder_name, get_ffmpeg_filter_complex_from_values,
                                   get_file_subtitle_from_video_path, is_file_video, update_progress_tracker,
                                   verify_show_folder_structure_from_path, wait_between_uploads,
-                                  extract_ep_compare_num_from_video_name)
+                                  extract_ep_compare_num_from_video_name, get_audio_bit_rate_from_video,
+                                  get_video_bit_rate_from_video)
 from ihatecircularimport import CCs, ensure_constants_py_exists
 ensure_constants_py_exists()
 from constants import *
@@ -405,6 +406,7 @@ class VideoObject:
         if filter_complex is None:
             filter_complex = NoFilterComplex()
         self.filter_complex = filter_complex
+        self.min_bitrates()
         # self.resolution = (self.filter_complex.x_resolution, self.filter_complex.y_resolution)
 
     def convert_file(self, destination_folder: str, destination_converted):
@@ -455,6 +457,15 @@ class VideoObject:
                     new_args.append(arg)
         # print(new_args)
         return new_args
+
+    def min_bitrates(self):
+        og_v_bitrate = get_video_bit_rate_from_video(self.path, self.filter_complex.video_stream_id)
+        og_a_bitrate = get_audio_bit_rate_from_video(self.path, self.filter_complex.audio_stream_id)
+        if og_v_bitrate is not None:
+            self.bitrate = min(float(og_v_bitrate), self.bitrate)
+        if og_a_bitrate is not None:
+            self.audio_bitrate = min(og_a_bitrate, self.audio_bitrate)
+
 
     @staticmethod
     def get_bitrate_from_t(t) -> (int, float):

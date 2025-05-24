@@ -3,6 +3,7 @@ import pathlib
 import requests
 import shutil
 import sys
+import mimetypes
 
 sys.path.append("../")
 
@@ -79,8 +80,43 @@ def upload_episode(config: Config, episode: pathlib.Path, show: pathlib.Path, se
     print(f"successfully uploaded episode {episode}!")
 
 
+def upload_filter_complex_builder(config: Config, filter_complex_path: pathlib.Path):
+    with open(filter_complex_path, "r") as f:
+        ff = json.load(f)
+
+    r = requests.post(
+        f"http://{config.server_ip}/authed/filter_complex_builder",
+        headers={"Authorization": f"Token {config.token}"},
+        json=ff
+    )
+    if not r.ok:
+        print(f"error in initializing uploading episode {episode}!")
+        print(r.content.decode())
+        exit(r.status_code)
+    print("sent over the filter complex builder!")
+
+
+def is_video(file: pathlib.Path) -> bool:
+    if mimetypes.guess_type(file)[0].startswith("video/"):
+        return True
+    return False
+
+
+def get_filter_complex_builder_path():
+    if pathlib.Path("./filter_complex_builder.json").exists():
+        return pathlib.Path("./filter_complex_builder.json")
+    if pathlib.Path("../filter_complex_builder.json").exists():
+        return pathlib.Path("../filter_complex_builder.json")
+    return None
+
+
 def main():
     config = Config("./clientconfig.json")
+
+    filter_complex_builder = get_filter_complex_builder_path()
+    if filter_complex_builder and filter_complex_builder.is_file():
+        upload_filter_complex_builder(config, filter_complex_builder)
+
     # pathlib.Path.iterdir()
 
     for folder in config.to_upload.iterdir():
@@ -89,7 +125,7 @@ def main():
         # print(type(folder))
         if folder.name == "MOVIES":
             for movie in folder.iterdir():
-                if movie.is_dir():
+                if movie.is_dir() or not is_video(movie):
                     continue
                 upload_movie(config, movie)
             continue
@@ -99,6 +135,8 @@ def main():
                 continue
             s_num = showuploaderbotfuncs.extract_season_number_from_folder_name(season_folder.name)
             for episode in season_folder.iterdir():
+                if episode.is_dir() or not is_video(episode):
+                    continue
                 e_s_num, e_num = showuploaderbotfuncs.extract_season_and_episode_number_from_video_name(episode.name)
                 if e_s_num != s_num:
                     print(f"season number for {episode} does not match with season folder number {season_folder.name}!")

@@ -112,7 +112,7 @@ def extract_season_and_episode_number_from_video_name(video_name: str) -> tuple[
     episode_number_length = None
     token = ""
     for letter in video_name[1:]:
-        if letter == ".":
+        if letter == "." or letter == "_":
             episode_number = int(token)
             episode_number_length = len(token)
             break
@@ -155,6 +155,29 @@ def get_all_subtitles_info_from_video(video_path: str) -> list[dict]:
 
 def get_all_audios_info_from_video(video_path: str) -> list[dict]:
     return get_all_codec_type_info_from_video(video_path, "audio")
+
+
+def get_all_videos_info_from_video(video_path: str) -> list[dict]:
+    return get_all_codec_type_info_from_video(video_path, "video")
+
+
+def get_codec_type_bit_rate_from_video(video_path: str, codec_type: str, codec_stream_id: int = 0) -> int | None:
+    infos = get_all_codec_type_info_from_video(video_path, codec_type)
+    if len(infos) < codec_stream_id:
+        return None
+    if "tags" not in infos[codec_stream_id].keys():
+        return None
+    if "BPS" not in infos[codec_stream_id]["tags"].keys():
+        return None
+    return int(int(infos[codec_stream_id]["tags"]["BPS"]) / 1000)
+
+
+def get_audio_bit_rate_from_video(video_path: str, audio_stream_id: int = 0) -> int | None:
+    return get_codec_type_bit_rate_from_video(video_path, "audio", audio_stream_id)
+
+
+def get_video_bit_rate_from_video(video_path: str, video_stream_id: int = 0) -> int | None:
+    return get_codec_type_bit_rate_from_video(video_path, "video", video_stream_id)
 
 
 def get_subtitle_info_from_video(video_path: str, subtitle_index=0) -> dict:
@@ -324,3 +347,12 @@ def season_number_to_folder(season_number: int) -> str:
 
 def get_episode_file_name(season_number: int, episode_number: int, og_name: str = ".mp4") -> str:
     return f"S{season_number:02}E{episode_number:02}_{og_name}"
+
+
+if __name__ == "__main__":
+    blah = get_all_audios_info_from_video("/mnt/f/meow/toconvert/clarence/s02/S02E01.mkv")
+    print(json.dumps(blah, indent=2))
+    blah = get_all_videos_info_from_video("/mnt/f/meow/toconvert/clarence/s02/S02E01.mkv")
+    print(json.dumps(blah, indent=2))
+    print(int(blah[0]["tags"]["BPS"]) / 1000)
+
