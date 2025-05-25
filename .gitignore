@@ -45,3 +45,5 @@ python/tsk/my_projects
 
 python/adventofcode/*/data.txt
 python/adventofcode/2021/output.txt
+python/showuploaderbot/*_filter_complex_builder.json
+python/showuploaderbot/filter_complex_builder*.json

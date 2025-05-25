@@ -57,6 +57,7 @@ class ResponseError(Enum):
     CONTENT_TOO_LONG = 15
     INVALID_FILE_TYPE = 16
     UPLOAD_ERROR = 17
+    DISCORD_SYNC_ERROR = 18
 
     def __str__(self):
         match self:
@@ -90,6 +91,8 @@ class ResponseError(Enum):
                 return "given file type is not acceptable"
             case self.UPLOAD_ERROR:
                 return "upload error with server, try again later"
+            case self.DISCORD_SYNC_ERROR:
+                return "discord sync error with server, try again later"
             case _:
                 return self.name
 
@@ -100,7 +103,7 @@ class ResponseError(Enum):
                     self.FILE_NAME_MISSING | self.INVALID_FILE_NAME | self.BODY_MISSING | self.CONTENT_TOO_LONG | \
                     self.INVALID_FILE_TYPE:
                 return http.HTTPStatus.BAD_REQUEST
-            case self.INTERNAL_ERROR:
+            case self.INTERNAL_ERROR | self.DISCORD_SYNC_ERROR:
                 return http.HTTPStatus.INTERNAL_SERVER_ERROR
             case self.AUTHORIZATION_MISSING | self.AUTHORIZATION_INVALID | self.AUTHORIZATION_SCHEME_INVALID | \
                     self.AUTHORIZATION_TOKEN_INVALID:

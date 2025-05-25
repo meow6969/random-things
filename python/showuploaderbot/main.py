@@ -1,8 +1,10 @@
 import json
 import math
 import os
+import threading
 import typing
 import sys
+import asyncio
 print(sys.version)
 
 import natsort
@@ -14,6 +16,7 @@ from convertfilestodiscorduploadable import convert_all_files, extract_video_con
 from ihatecircularimport import CCs
 from showuploaderbotclasses import TvShow
 from showuploaderbotfuncs import ensure_config_json_exists, is_file_video, save_progress_tracker, wait_between_uploads
+import constants
 
 
 def setup_bot_client() -> commands.Bot:
@@ -21,6 +24,7 @@ def setup_bot_client() -> commands.Bot:
     ensure_config_json_exists()
     _client = commands.Bot(command_prefix="showbot")
     _client.sync_lock = False
+    _client.convert_lock = False
 
     with open("config.json", "r") as f:
         config = json.load(f)
@@ -253,6 +257,27 @@ def is_movie_already_uploaded(movie_name: str) -> bool:
     return True
 
 
+def convert_files():
+    files_to_convert_dir, output_files_dir, files_converted_dir = extract_video_converter_fields_from_config()
+
+    convert_all_files(files_to_convert_dir, output_files_dir, files_converted_dir)
+
+
+async def convert_files_async() -> bool:
+    if client.sync_lock:
+        return False
+    if client.convert_lock:
+        return False
+    client.convert_lock = True
+
+    convert_files_thread = threading.Thread(target=convert_files)
+    convert_files_thread.start()
+    while convert_files_thread.is_alive():
+        await asyncio.sleep(1)
+    client.convert_lock = False
+    return True
+
+
 client = setup_bot_client()
 
 
@@ -271,6 +296,18 @@ async def on_ready():
     await sync_all_uploads(client.shows_folder)
 
 
+@client.event
+async def on_message(message: discord.Message):
+    if message.author == client.user:
+        return
+    if message.author.id != constants.SELFBOT_NOTIFIER_WEBHOOK_ID:
+        return
+    if message.content != "!STARTUPLOAD":
+        return
+    await convert_files_async()
+
+
+
 @client.command()
 async def about(ctx):
     await ctx.send("hello! i am show uploader bot! i upload ur fav tv shows!!\n"
@@ -280,13 +317,14 @@ async def about(ctx):
 
 @client.command()
 async def sync_shows(ctx):
-    pass
     await ctx.send("syncing shows...")
     r = await sync_all_uploads(client.shows_folder)
     if r:
         return await ctx.send("done syncing shows!")
     elif client.sync_lock:
         return await ctx.send("sync is locked!")
+    elif client.convert_lock:
+        return await ctx.send("convert is locked!")
     return await ctx.send("error syncing shows!")
 
 
@@ -295,9 +333,8 @@ def start_bot():
     with open("config.json") as meow:
         the_config = json.load(meow)
         token = the_config["token"]
-    files_to_convert_dir, output_files_dir, files_converted_dir = extract_video_converter_fields_from_config()
 
-    convert_all_files(files_to_convert_dir, output_files_dir, files_converted_dir)
+    # convert_files()
 
     client.run(token)
 

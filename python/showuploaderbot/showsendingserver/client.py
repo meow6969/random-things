@@ -91,6 +91,20 @@ def upload_episode(config: Config, episode: pathlib.Path, show: pathlib.Path, se
     print(f"successfully uploaded episode {episode}!")
 
 
+def send_discord_sync_request(config: Config):
+    print("requesting discord sync...")
+
+    r = requests.post(
+        f"http://{config.server_ip}/authed/sync_to_discord",
+        headers={"Authorization": f"Token {config.token}"}
+    )
+    if not r.ok:
+        print(f"error in sending discord sync request {r.status_code}!")
+        print(r.content.decode())
+        exit(r.status_code)
+    print("discord sync request sent!")
+
+
 def upload_filter_complex_builder(config: Config, filter_complex_path: pathlib.Path):
     with open(filter_complex_path, "r") as f:
         ff = json.load(f)
@@ -101,7 +115,7 @@ def upload_filter_complex_builder(config: Config, filter_complex_path: pathlib.P
         json=ff
     )
     if not r.ok:
-        print(f"error in initializing uploading episode {episode}!")
+        print(f"error in uploading the filter complex builder!")
         print(r.content.decode())
         exit(r.status_code)
     print("sent over the filter complex builder!")
@@ -155,6 +169,7 @@ def main():
                     print(f"season number for {episode} does not match with season folder number {season_folder.name}!")
                     exit(1)
                 upload_episode(config, episode, folder, s_num, e_num)
+    send_discord_sync_request(config)
 
 
 if __name__ == "__main__":

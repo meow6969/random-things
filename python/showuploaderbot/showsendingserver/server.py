@@ -201,12 +201,15 @@ async def upload_file(request: web.Request):
         up.status = UploadStatus.UPLOADING
         up.file_path.parent.mkdir(parents=True, exist_ok=True)
         async with aiofiles.open(up.file_path, mode="wb+") as f:
-            await f.write(await request.read())
+            video = await request.read()
+            await f.write(video)
         up.status = UploadStatus.UPLOADED
     except Exception as e:
         if up is not None:
             up.status = UploadStatus.FAILED
         return constants.SHOW_SENDING_SERVER.r.new("error", ResponseError.UPLOAD_ERROR, f"{e}")
+    del request._read_bytes
+    del request
     return constants.SHOW_SENDING_SERVER.r.new("ok")
 
 
@@ -214,16 +217,20 @@ async def upload_file(request: web.Request):
 async def sync_filter_complex_builder(request: web.Request):
     print("syncing filter commplex builder...")
     data = await request.json()
+    print(constants.FILTER_COMPLEX_BUILDER_JSON_PATH)
+    print(constants.FILTER_COMPLEX_BUILDER_JSON_PATH.exists())
 
     if constants.FILTER_COMPLEX_BUILDER_JSON_PATH.exists():
         with open(constants.FILTER_COMPLEX_BUILDER_JSON_PATH, "r") as f:
             previous = json.load(f)
+        print("previous filter complex: ")
+        print(json.dumps(previous, indent=2))
 
         saved = False
         i = 1
         while not saved:
             bk_filepath = constants.FILTER_COMPLEX_BUILDER_JSON_PATH.parent.joinpath(
-                f"{i}_{constants.FILTER_COMPLEX_BUILDER_JSON_PATH}")
+                f"{i}_{constants.FILTER_COMPLEX_BUILDER_JSON_PATH.name}")
             if bk_filepath.exists():
                 i += 1
                 continue
@@ -240,18 +247,34 @@ async def sync_filter_complex_builder(request: web.Request):
                 if "regex-actions" not in data[thingy_key]["filter-complex-regex-filename"]:
                     continue
                 previous_regex_hashes = []
-                for regex_action in previous[thingy_key]["filter-complex-regex-actions"]:
+                for regex_action in previous[thingy_key]["filter-complex-regex-filename"]:
                     previous_regex_hashes.append(hash_dict_or_list(regex_action))
-                for regex_action in data[thingy_key]["filter-complex-regex-actions"]["regex-actions"]:
+                for regex_action in data[thingy_key]["filter-complex-regex-filename"]["regex-actions"]:
                     regex_hash = hash_dict_or_list(regex_action)
                     if regex_hash not in previous_regex_hashes:
                         previous_regex_hashes.append(regex_hash)
-                        previous[thingy_key]["filter-complex-regex-actions"].append(regex_action)
+                        previous[thingy_key]["filter-complex-regex-filename"]["regex-actions"].append(regex_action)
         data = previous
 
     with open(constants.FILTER_COMPLEX_BUILDER_JSON_PATH, "w+") as f:
-        json.dump(data, f)
+        json.dump(data, f, indent=2)
     print("successfully synced!")
+    return constants.SHOW_SENDING_SERVER.r.new("ok")
+
+
+@routes.post("/authed/sync_to_discord")
+def sync_to_discord(request: web.Request):
+    async with aiohttp.ClientSession() as session:
+        async with session.post(constants.DISCORD_WEBHOOK_URL, json={"username": "kitty", "content": "!STARTUPLOAD"}) as response:
+            if response.status != 200:
+                return constants.SHOW_SENDING_SERVER.r.new("error", ResponseError.DISCORD_SYNC_ERROR)
+
+    # aiohttp.request(
+    #     "GET",
+    #     constants.SELFBOT_NOTIFIER_WEBHOOK_URL,
+    #     json={"username": "kitty", "content": "!STARTUPLOAD"}
+    # )
+
     return constants.SHOW_SENDING_SERVER.r.new("ok")
 
 
