@@ -124,6 +124,8 @@ def get_filter_complex_builder_path():
 def main():
     config = Config("./clientconfig.json")
 
+    check_server_connection(config)
+
     filter_complex_builder = get_filter_complex_builder_path()
     if filter_complex_builder and filter_complex_builder.is_file():
         upload_filter_complex_builder(config, filter_complex_builder)
