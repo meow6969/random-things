@@ -164,6 +164,7 @@ async def get_uploads(request: web.Request):
 
 @routes.post("/authed/new_episode")
 async def create_upload(request: web.Request):
+    print("got a new episode upload")
     upload = await ClientEpisodeUpload.from_request(request)
     if isinstance(upload, web.Response):
         return upload
@@ -173,6 +174,7 @@ async def create_upload(request: web.Request):
 
 @routes.post("/authed/new_movie")
 async def create_movie_upload(request: web.Request):
+    print("got a new movie upload")
     upload = await ClientMovieUpload.from_request(request)
     if isinstance(upload, web.Response):
         return upload
@@ -210,6 +212,7 @@ async def upload_file(request: web.Request):
 
 @routes.post("/authed/filter_complex_builder")
 async def sync_filter_complex_builder(request: web.Request):
+    print("syncing filter commplex builder...")
     data = await request.json()
 
     if constants.FILTER_COMPLEX_BUILDER_JSON_PATH.exists():
@@ -248,6 +251,7 @@ async def sync_filter_complex_builder(request: web.Request):
 
     with open(constants.FILTER_COMPLEX_BUILDER_JSON_PATH, "w+") as f:
         json.dump(data, f)
+    print("successfully synced!")
     return constants.SHOW_SENDING_SERVER.r.new("ok")
 
 

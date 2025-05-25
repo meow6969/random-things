@@ -27,6 +27,17 @@ class Config:
         self.server_ip = ff["server-ip"]
 
 
+def check_server_connection(config: Config):
+    print("checking server connection...")
+    r = requests.get(f"http://{config.server_ip}/")
+    if not r.ok:
+        print(f"get request to route \"/\" returned {r.status_code}, exiting...")
+        print(r.content.decode())
+        exit(r.status_code)
+    print("server connection established!")
+    print(r.content.decode())
+
+
 def upload_movie(config: Config, movie: pathlib.Path):
     filename = movie.name
     r = requests.post(
