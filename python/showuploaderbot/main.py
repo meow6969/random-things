@@ -307,7 +307,6 @@ async def on_message(message: discord.Message):
     await convert_files_async()
 
 
-
 @client.command()
 async def about(ctx):
     await ctx.send("hello! i am show uploader bot! i upload ur fav tv shows!!\n"

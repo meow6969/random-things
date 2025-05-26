@@ -263,10 +263,10 @@ async def sync_filter_complex_builder(request: web.Request):
 
 
 @routes.post("/authed/sync_to_discord")
-def sync_to_discord(request: web.Request):
+async def sync_to_discord(request: web.Request):
     async with aiohttp.ClientSession() as session:
-        async with session.post(constants.DISCORD_WEBHOOK_URL, json={"username": "kitty", "content": "!STARTUPLOAD"}) as response:
-            if response.status != 200:
+        async with session.post(constants.SELFBOT_NOTIFIER_WEBHOOK_URL, json={"username": "kitty", "content": "!STARTUPLOAD"}) as response:
+            if response.status != 204 and response.status != 200:
                 return constants.SHOW_SENDING_SERVER.r.new("error", ResponseError.DISCORD_SYNC_ERROR)
 
     # aiohttp.request(
