@@ -305,6 +305,7 @@ async def on_message(message: discord.Message):
     if message.content != "!STARTUPLOAD":
         return
     await convert_files_async()
+    await sync_all_uploads(client.shows_folder)
 
 
 @client.command()

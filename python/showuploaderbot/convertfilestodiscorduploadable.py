@@ -41,10 +41,10 @@ def convert_all_files(files_to_convert_dir, output_files_dir, files_converted_di
                                        os.path.join(files_converted_dir, "MOVIES",
                                                     movie_file_name))
             continue
-        if not verify_show_folder_structure_from_path(show_folder_path, show_folder_name):
-            input(f"{CCs.FAIL}show {show_folder_path} has invalid folder structure, please check!\n"
-                  f"press ctrl+c to stop or enter to automatically fix season folder structure{CCs.ENDC}")
-            fix_season_folder_structure(show_folder_path)
+        # if not verify_show_folder_structure_from_path(show_folder_path, show_folder_name):
+        #     input(f"{CCs.FAIL}show {show_folder_path} has invalid folder structure, please check!\n"
+        #           f"press ctrl+c to stop or enter to automatically fix season folder structure{CCs.ENDC}")
+        #     fix_season_folder_structure(show_folder_path)
         for season_folder_name in natsort.natsorted(os.listdir(show_folder_path)):
             show_filter_complex = FILTER_COMPLEX_BUILDER.get_filter_complex(show_folder_name)
             season_folder_path = os.path.join(show_folder_path, season_folder_name)

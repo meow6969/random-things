@@ -185,6 +185,7 @@ internal static class Program
         {
             // the thingy returned as a non perfect square root
             (int coefficient, int underTheRoot) = SimplifyRadical((int)underTheSqrt);
+            // Console.WriteLine($"coefficient={coefficient}, underTheRoot={underTheRoot}");
 
             if (IsNumberInteger(denominator) && IsNumberInteger(b))
             {
@@ -194,6 +195,7 @@ internal static class Program
             {
                 gcf = 1;
             }
+            // Console.WriteLine($"gcf={gcf}, denominator={denominator}, IsNumberInteger(b={b})={IsNumberInteger(b)}, IsNumberInteger(denominator={denominator})={IsNumberInteger(denominator)}");
             
             coefficient /= gcf;
             denominator /= gcf;
@@ -205,13 +207,13 @@ internal static class Program
             if (coefficient != 1) coefficientString = $"{coefficient}";
             else bString += " ";
             
-            if (NumberEqualsInt(denominator, 1))
+            if (!NumberEqualsInt(denominator, 1))
             {
                 preDenominatorString = "\\frac{";
                 denominatorString = $"}}{{{denominator}}}";
             }
             
-            if (NumberEqualsInt(b, 1)) bString = $"{-b} + ";
+            if (!NumberEqualsInt(b, 0)) bString = $"{-b} + ";
             string exactEquations = "Quadratic formula result: ";
             exactEquations += $"{preDenominatorString}{bString}{coefficientString}\\sqrt{{{underTheRoot}}}{imaginary}" +
                               $"{denominatorString}, ";
