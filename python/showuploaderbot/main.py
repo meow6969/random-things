@@ -22,7 +22,7 @@ import constants
 def setup_bot_client() -> commands.Bot:
     print(f"{CCs.OKCYAN}setting up commands.Bot object as client{CCs.ENDC}")
     ensure_config_json_exists()
-    _client = commands.Bot(command_prefix="showbot")
+    _client = commands.Bot(command_prefix="showbot!")
     _client.sync_lock = False
     _client.convert_lock = False
 
@@ -263,6 +263,12 @@ def convert_files():
     convert_all_files(files_to_convert_dir, output_files_dir, files_converted_dir)
 
 
+async def is_user_bot_owner(message) -> bool:
+    if message.author.id not in client.owners:
+        return False
+    return True
+
+
 async def convert_files_async() -> bool:
     if client.sync_lock:
         return False
@@ -292,6 +298,7 @@ async def on_ready():
     # await client.show_sending_server.start()
 
     print(f"{CCs.OKGREEN}show uploader bot ready!{CCs.ENDC}")
+    print(f"logged on as {client.user}!")
     # await sort_show_channels()
     await sync_all_uploads(client.shows_folder)
 
@@ -300,6 +307,10 @@ async def on_ready():
 async def on_message(message: discord.Message):
     if message.author == client.user:
         return
+    print(f"{message.author}: {message.content}")
+    if message.guild.id != client.shows_server_id:
+        return
+    await client.process_commands(message)
     if message.author.id != constants.SELFBOT_NOTIFIER_WEBHOOK_ID:
         return
     if message.content != "!STARTUPLOAD":
@@ -317,15 +328,27 @@ async def about(ctx):
 
 @client.command()
 async def sync_shows(ctx):
-    await ctx.send("syncing shows...")
+    if not await is_user_bot_owner(ctx.message):
+        return await ctx.send("you cant  do this command")
+    await ctx.send("converting shows...")
+
+    r = await convert_files_async()
+    if not r:
+        if client.sync_lock:
+            return await ctx.send("error! sync is locked!")
+        elif client.convert_lock:
+            return await ctx.send("error! convert is locked!")
+        return await ctx.reply("an error occurred while converting shows!")
+
+    await ctx.reply("done converting shows!\nnow syncing shows...")
     r = await sync_all_uploads(client.shows_folder)
     if r:
-        return await ctx.send("done syncing shows!")
+        return await ctx.reply("done syncing shows!")
     elif client.sync_lock:
-        return await ctx.send("sync is locked!")
+        return await ctx.reply("error! sync is locked!")
     elif client.convert_lock:
-        return await ctx.send("convert is locked!")
-    return await ctx.send("error syncing shows!")
+        return await ctx.reply("error! convert is locked!")
+    return await ctx.reply("error syncing shows!")
 
 
 def start_bot():

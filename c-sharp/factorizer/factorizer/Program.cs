@@ -94,6 +94,28 @@ internal static class Program
 
     }
 
+    private static double RadiansToDegrees(double radians)
+    {
+        return radians * 180 / Math.PI;
+    }
+
+    public static void XyToPolarCoordinatesCmd(double x, double y)
+    {
+        double magnitude = Math.Sqrt(x * x + y * y);
+        double baseAngle = RadiansToDegrees(Math.Atan2(Math.Abs(y), Math.Abs(x)));
+        double polarAngle;
+        if (x < 0 && y > 0) polarAngle = 180 - baseAngle;
+        else if (x < 0 && y < 0) polarAngle = 180 + baseAngle;
+        else if (x > 0 && y < 0) polarAngle = 360 - baseAngle;
+        else polarAngle = baseAngle;
+        
+        Console.WriteLine($"polar coordinates: ({x},{y})");
+        Console.WriteLine($"magnitude: {magnitude}");
+        Console.WriteLine($"baseAngle: {baseAngle}");
+        Console.WriteLine($"polarAngle: {polarAngle}");
+        Console.WriteLine($"polar coordinates: ({magnitude},{polarAngle})");
+    }
+
     private static int Factorial(int n)
     {
         return Enumerable.Range(1, n).Aggregate(1, (p, item) => p * item);

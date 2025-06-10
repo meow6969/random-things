@@ -140,7 +140,15 @@ public enum FuncCode
     // [CmdParamTypeOptions(AllowExtraParams = false)]
     [CmdFlags("q", "-q", "--quad", "--quadratic")]
     // [CmdFlags("q")]
-    QuadraticFormula
+    QuadraticFormula,
+    
+    [CmdMethod(typeof(Program), "XyToPolarCoordinatesCmd")]
+    [CmdParamType(typeof(int), typeof(double), MinimumRequired = 2, MaximumAllowed = 2)]
+    [CmdParamType(typeof(string), MinimumRequired = 2, MaximumAllowed = 2)]
+    // [CmdParamTypeOptions(AllowExtraParams = false)]
+    [CmdFlags("-p", "--polar")]
+    // [CmdFlags("q")]
+    XyToPolarCoordinates
 }
 
 file class EnumExtensionsConstants

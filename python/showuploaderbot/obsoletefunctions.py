@@ -248,8 +248,8 @@ if __name__ == "__main__":
     # verify_episode_numbered_series_links("/mnt/f/meow/toconvert/keroro-gunsou")
     # rename_show_folder_season_folders()
     # test_get_list_of_dict_keys_as_dict_list()
-    check_for_subtitle_changes_for_show("/mnt/f/meow/toconvert/highschool-dxd")
-    check_for_audio_changes_for_show("/mnt/f/meow/toconvert/highschool-dxd")
+    check_for_subtitle_changes_for_show("/mnt/f/meow/toconvert/higurashi-no-naku-koro-ni")
+    check_for_audio_changes_for_show("/mnt/f/meow/toconvert/higurashi-no-naku-koro-ni")
     # check_for_subtitle_changes_for_show("/mnt/f/meow/converted/hokuto-no-ken")
     # check_for_audio_changes_for_show("/mnt/f/meow/converted/hokuto-no-ken")
     # check_subtitle_ranges_for_show("hokuto-no-ken",

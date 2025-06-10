@@ -200,6 +200,9 @@ class FilterComplexBuilder:
     show_to_filter_converter: dict
 
     def __init__(self):
+        self.get_filter_complex_json_data()
+
+    def get_filter_complex_json_data(self):
         if os.path.exists(FILTER_COMPLEX_BUILDER_JSON_PATH):
             with open(FILTER_COMPLEX_BUILDER_JSON_PATH) as f:
                 self.filter_complex_dict = json.load(f)
@@ -210,9 +213,11 @@ class FilterComplexBuilder:
             self.filter_complex_dict = {}
         self.show_to_filter_converter = {}
         for show_name in self.filter_complex_dict.keys():
-            self.show_to_filter_converter["show_name"] = self.get_filter_complex(show_name)
+            self.show_to_filter_converter["show_name"] = self.get_filter_complex(show_name, refresh=False)
 
-    def get_filter_complex(self, show_name: str):
+    def get_filter_complex(self, show_name: str, refresh=True):
+        if refresh:
+            self.get_filter_complex_json_data()
         if show_name not in self.filter_complex_dict.keys():
             return NoFilterComplex({}, "")
         selector_type: str | int = self.filter_complex_dict[show_name]["filter-complex-selector-type"]
