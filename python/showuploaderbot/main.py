@@ -5,6 +5,7 @@ import threading
 import typing
 import sys
 import asyncio
+import traceback
 print(sys.version)
 
 import natsort
@@ -82,7 +83,8 @@ async def sync_all_uploads(shows_folder: str) -> bool:
         client.sync_lock = False
         return True
     except Exception as e:
-        print(f"{CCs.FAIL}error in show sync: {e}{CCs.ENDC}")
+        traceback.print_exc()
+        # print(f"{CCs.FAIL}error in show sync: {e}{CCs.ENDC}")
         client.sync_lock = False
         return False
     # await client.close()
@@ -213,7 +215,7 @@ async def get_category_for_show(show_name: str) -> discord.CategoryChannel:
         if channel.name.lower() == category_name:
             return channel
 
-    return await client.guilds[0].create_category(category_name)
+    return await client.shows_server.create_category(category_name)
 
 
 def get_show_category_id_from_show_channel_index(show_channel_index: int) -> int:
@@ -275,12 +277,14 @@ async def convert_files_async() -> bool:
     if client.convert_lock:
         return False
     client.convert_lock = True
+    client.sync_lock = True
 
     convert_files_thread = threading.Thread(target=convert_files)
     convert_files_thread.start()
     while convert_files_thread.is_alive():
         await asyncio.sleep(1)
     client.convert_lock = False
+    client.sync_lock = False
     return True
 
 
@@ -308,15 +312,14 @@ async def on_message(message: discord.Message):
     if message.author == client.user:
         return
     print(f"{message.author}: {message.content}")
+    if message.author.id == constants.SELFBOT_NOTIFIER_WEBHOOK_ID and message.content == "!STARTUPLOAD":
+        await convert_files_async()
+        await sync_all_uploads(client.shows_folder)
+        return
     if message.guild.id != client.shows_server_id:
         return
     await client.process_commands(message)
-    if message.author.id != constants.SELFBOT_NOTIFIER_WEBHOOK_ID:
-        return
-    if message.content != "!STARTUPLOAD":
-        return
-    await convert_files_async()
-    await sync_all_uploads(client.shows_folder)
+
 
 
 @client.command()
@@ -341,6 +344,14 @@ async def sync_shows(ctx):
         return await ctx.reply("an error occurred while converting shows!")
 
     await ctx.reply("done converting shows!\nnow syncing shows...")
+
+    if not os.path.exists(os.path.join(os.getcwd(), "progress_tracker.json")):
+        with open("progress_tracker.json", "w+") as f:
+            json.dump({}, f)
+    with open("progress_tracker.json", "r+") as f:
+        progress_tracker = json.load(f)
+        client.progress_tracker = progress_tracker
+
     r = await sync_all_uploads(client.shows_folder)
     if r:
         return await ctx.reply("done syncing shows!")
