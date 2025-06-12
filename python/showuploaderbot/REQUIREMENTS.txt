@@ -4,3 +4,4 @@ aiohttp
 aioconsole
 aiofiles
 requests
+audioop-lts
