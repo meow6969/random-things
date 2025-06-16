@@ -247,7 +247,7 @@ async def sync_filter_complex_builder(request: web.Request):
                 if "regex-actions" not in data[thingy_key]["filter-complex-regex-filename"]:
                     continue
                 previous_regex_hashes = []
-                for regex_action in previous[thingy_key]["filter-complex-regex-filename"]:
+                for regex_action in previous[thingy_key]["filter-complex-regex-filename"]["regex-actions"]:
                     previous_regex_hashes.append(hash_dict_or_list(regex_action))
                 for regex_action in data[thingy_key]["filter-complex-regex-filename"]["regex-actions"]:
                     regex_hash = hash_dict_or_list(regex_action)
