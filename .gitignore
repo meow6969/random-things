@@ -47,3 +47,14 @@ python/adventofcode/*/data.txt
 python/adventofcode/2021/output.txt
 python/showuploaderbot/*_filter_complex_builder.json
 python/showuploaderbot/filter_complex_builder*.json
+python/showuploaderbot/progress_tracker (copy 1).json
+
+rust/usernamegen/target/*
+rust/usernamegen/out
+rust/usernamegen/namegen
+
+rust/mods_updater/target/*
+rust/mods_updater/mods/*
+rust/mods_updater/emojicord/*
+rust/mods_updater/options.txt
+

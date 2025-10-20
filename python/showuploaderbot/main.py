@@ -316,6 +316,8 @@ async def on_message(message: discord.Message):
         await convert_files_async()
         await sync_all_uploads(client.shows_folder)
         return
+    if message.guild is None:
+        return
     if message.guild.id != client.shows_server_id:
         return
     await client.process_commands(message)

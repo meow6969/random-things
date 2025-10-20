@@ -33,7 +33,7 @@ def check_server_connection(config: Config):
     if not r.ok:
         print(f"get request to route \"/\" returned {r.status_code}, exiting...")
         print(r.content.decode())
-        exit(r.status_code)
+        exit(0)
     print("server connection established!")
     print(r.content.decode())
 
@@ -48,7 +48,7 @@ def upload_movie(config: Config, movie: pathlib.Path):
     if not r.ok:
         print(f"error in initializing uploading movie {movie}!")
         print(r.content.decode())
-        exit(r.status_code)
+        exit(0)
     with open(movie, "rb") as m_f:
         g = requests.post(
             f"http://{config.server_ip}/authed/upload/{r.json()['id']}",
@@ -58,7 +58,7 @@ def upload_movie(config: Config, movie: pathlib.Path):
     if not g.ok:
         print(f"error in uploading movie {movie}!")
         print(g.content.decode())
-        exit(g.status_code)
+        exit(0)
     move_dir = config.uploaded.joinpath("MOVIES")
     move_dir.mkdir(parents=True, exist_ok=True)
     shutil.move(movie, move_dir.joinpath(filename))
@@ -74,7 +74,7 @@ def upload_episode(config: Config, episode: pathlib.Path, show: pathlib.Path, se
     if not r.ok:
         print(f"error in initializing uploading episode {episode}!")
         print(r.content.decode())
-        exit(r.status_code)
+        exit(0)
     with open(episode, "rb") as e_f:
         g = requests.post(
             f"http://{config.server_ip}/authed/upload/{r.json()['id']}",
@@ -84,7 +84,7 @@ def upload_episode(config: Config, episode: pathlib.Path, show: pathlib.Path, se
     if not g.ok:
         print(f"error in uploading episode {episode}!")
         print(g.content.decode())
-        exit(g.status_code)
+        exit(0)
     move_dir = config.uploaded.joinpath(show.name).joinpath(showuploaderbotfuncs.season_number_to_folder(season))
     move_dir.mkdir(parents=True, exist_ok=True)
     shutil.move(episode, move_dir.joinpath(episode.name))
@@ -101,7 +101,7 @@ def send_discord_sync_request(config: Config):
     if not r.ok:
         print(f"error in sending discord sync request {r.status_code}!")
         print(r.content.decode())
-        exit(r.status_code)
+        exit(0)
     print("discord sync request sent!")
 
 
@@ -117,7 +117,7 @@ def upload_filter_complex_builder(config: Config, filter_complex_path: pathlib.P
     if not r.ok:
         print(f"error in uploading the filter complex builder!")
         print(r.content.decode())
-        exit(r.status_code)
+        exit(0)
     print("sent over the filter complex builder!")
 
 
@@ -167,7 +167,7 @@ def main():
                 e_s_num, e_num = showuploaderbotfuncs.extract_season_and_episode_number_from_video_name(episode.name)
                 if e_s_num != s_num:
                     print(f"season number for {episode} does not match with season folder number {season_folder.name}!")
-                    exit(1)
+                    exit(0)
                 upload_episode(config, episode, folder, s_num, e_num)
     send_discord_sync_request(config)
 

@@ -5,7 +5,7 @@ from typing import Tuple
 import natsort
 
 from ihatecircularimport import CCs, ensure_constants_py_exists
-from showuploaderbotclasses import FILTER_COMPLEX_BUILDER, VideoObject
+from showuploaderbotclasses import FilterComplexBuilder, VideoObject
 from showuploaderbotfuncs import (ensure_config_json_exists, fix_season_folder_structure, is_file_video,
                                   verify_show_folder_structure_from_path)
 
@@ -25,6 +25,8 @@ def extract_video_converter_fields_from_config() -> tuple[str, str, str]:
 def convert_all_files(files_to_convert_dir, output_files_dir, files_converted_dir):
     print(f"{CCs.HEADER}{CCs.OKGREEN}converting all files in {files_to_convert_dir} to {output_files_dir}{CCs.ENDC}")
 
+    filter_complex_builder = FilterComplexBuilder()
+
     for show_folder_name in natsort.natsorted(os.listdir(files_to_convert_dir)):
         if show_folder_name.startswith("SKIP"):
             continue
@@ -35,7 +37,7 @@ def convert_all_files(files_to_convert_dir, output_files_dir, files_converted_di
                 if is_file_video(movie_file_path):
                     print(f"{CCs.OKGREEN}{movie_file_path} -> "
                           f"{os.path.join(output_files_dir, 'MOVIES', movie_file_name)}{CCs.ENDC}")
-                    movie_filter_complex = FILTER_COMPLEX_BUILDER.get_filter_complex(show_folder_name)
+                    movie_filter_complex = filter_complex_builder.get_filter_complex(show_folder_name)
                     video = VideoObject(movie_file_path, movie_filter_complex)
                     video.convert_file(os.path.join(output_files_dir, "MOVIES", movie_file_name),
                                        os.path.join(files_converted_dir, "MOVIES",
@@ -46,7 +48,7 @@ def convert_all_files(files_to_convert_dir, output_files_dir, files_converted_di
         #           f"press ctrl+c to stop or enter to automatically fix season folder structure{CCs.ENDC}")
         #     fix_season_folder_structure(show_folder_path)
         for season_folder_name in natsort.natsorted(os.listdir(show_folder_path)):
-            show_filter_complex = FILTER_COMPLEX_BUILDER.get_filter_complex(show_folder_name)
+            show_filter_complex = filter_complex_builder.get_filter_complex(show_folder_name)
             season_folder_path = os.path.join(show_folder_path, season_folder_name)
             for episode_file_name in natsort.natsorted(os.listdir(season_folder_path)):
                 episode_file_path = os.path.join(season_folder_path, episode_file_name)

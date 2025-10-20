@@ -95,9 +95,13 @@ class TvShow:
                     continue
                 if not is_file_video(episode_path):
                     continue
+
                 episode = ShowEpisode(self, season, episode_path, season.current_episode_number,
                                       self.total_episode_number)
                 first_ep = await episode.upload_to_discord(upload_channel, first_ep)
+                if first_ep == -1:
+                    return
+
 
         print(f"{CCs.OKGREEN}done uploading!{CCs.ENDC}")
 
@@ -160,12 +164,16 @@ class ShowEpisode:
             return True
         return False
 
-    async def upload_to_discord(self, upload_channel: discord.TextChannel, first_ep: bool) -> bool:
+    async def upload_to_discord(self, upload_channel: discord.TextChannel, first_ep: bool) -> bool | int:
         if self.already_uploaded():
             # print(f"{CCs.WARNING}season {season_number} episode {episode_number} ({episode_name}) "
             #       f"ALREADY UPLOADED{CCs.ENDC}")
             self.season.increase_episode_number()
             return False
+        if os.path.getsize(self.episode_path) > 52428800:  # TODO
+            print(f"{CCs.FAIL}show {self.show.show_name} season {self.season.season_number} episode"
+                  f" {self.season.current_episode_number} file size too big, skipping{CCs.ENDC}")
+            return -1
 
         if self.later_episode_already_uploaded():
             print(f"{CCs.FAIL} {self.human_readable_episode_string}"
@@ -515,4 +523,4 @@ class VideoObject:
         raise Exception(f"could not find length from output: {str_out}")
 
 
-FILTER_COMPLEX_BUILDER = FilterComplexBuilder()
+# FILTER_COMPLEX_BUILDER = FilterComplexBuilder()

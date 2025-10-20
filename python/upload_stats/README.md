@@ -4,3 +4,7 @@ nicotine+ plugin that saves statistics about the users who download from you, as
 this is very much on hold / maybe abandoned?  
 there are features i want to add but not really motivated to add them  
 i will update the plugin whenever it breaks though  
+  
+# TODO
+
+ * uhh like track literally everything in a append only thing or sommething

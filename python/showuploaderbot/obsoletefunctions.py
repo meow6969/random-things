@@ -1,6 +1,8 @@
 import json
 import os
+import sys
 import time
+import pathlib
 
 import natsort
 
@@ -244,12 +246,34 @@ def check_subtitle_ranges_for_show(show_name: str, show_path: str) -> None:
                         print(f"{CCs.OKGREEN}{episode_file_name} fits in {episode_range}{CCs.ENDC}")
 
 
+def regenerate_progress_tracker(shows_folder: str):
+    shows_folder = pathlib.Path(shows_folder)
+    new_tracker = {}
+
+    for show in sorted(shows_folder.iterdir()):
+        if not show.is_dir():
+            continue
+        if show.name == "MOVIES":
+            continue
+        new_tracker[show.name] = {}
+        for season in sorted(show.iterdir()):
+            if not season.is_dir():
+                continue
+
+            new_tracker[show.name][season.name] = 0
+            for _ in season.iterdir():
+                new_tracker[show.name][season.name] += 1
+    print(json.dumps(new_tracker, indent=2))
+
+
+
 if __name__ == "__main__":
     # verify_episode_numbered_series_links("/mnt/f/meow/toconvert/keroro-gunsou")
     # rename_show_folder_season_folders()
     # test_get_list_of_dict_keys_as_dict_list()
-    check_for_subtitle_changes_for_show("/mnt/f/meow/toconvert/konosuba-rashii-sekai-ni-shukufuku-wo")
-    check_for_audio_changes_for_show("/mnt/f/meow/toconvert/konosuba-rashii-sekai-ni-shukufuku-wo")
+    check_for_subtitle_changes_for_show("/mnt/f/meow/toconvert/chis-sweet-home")
+    check_for_audio_changes_for_show("/mnt/f/meow/toconvert/chis-sweet-home")
+    # regenerate_progress_tracker("/mnt/g/archivestuff/visualmediaarchives/discord50mbtvshows/")
     # check_for_subtitle_changes_for_show("/mnt/f/meow/converted/hokuto-no-ken")
     # check_for_audio_changes_for_show("/mnt/f/meow/converted/hokuto-no-ken")
     # check_subtitle_ranges_for_show("hokuto-no-ken",
