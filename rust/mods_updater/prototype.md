@@ -1,10 +1,16 @@
 
 ${url}/files.json:
 ```json
-[
-  { "name": "path/to/file", "hash": "xxx" },
-  ...
-]
+{
+  "filedata": [
+    { "name": "path/to/file", "hash": "xxx" },
+    ...
+  ],
+  "removedata": [
+    "path/to/file",
+    ...
+  ]
+}
 ```
 
 `${url}/files[x]["hash"]` contains file
